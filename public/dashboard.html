@@ -8,20 +8,65 @@
 <body>
   <div class="container">
     <h1>📞 Smart Contact Dashboard</h1>
+
+    <!-- Language Toggle -->
+    <div id="languageToggle">
+      <button onclick="setLanguage('en')">🇬🇧 English</button>
+      <button onclick="setLanguage('af')">🇿🇦 Afrikaans</button>
+    </div>
+
+    <!-- Last Updated Timestamp -->
     <p id="lastUpdated">🔄 Last updated: never</p>
+
+    <!-- Loading Spinner -->
     <div id="spinner">⏳ Loading dashboard...</div>
-    <div id="dashboardContent">
-      <h2>📊 Call Summary</h2>
+
+    <!-- Call Summary -->
+    <section>
+      <h2 id="callSummaryTitle">📊 Call Summary</h2>
       <p>Today: <span id="todayCount">0</span></p>
       <p>This Month: <span id="monthCount">0</span></p>
       <p>This Year: <span id="yearCount">0</span></p>
-	  <section>
-  <h2>📋 View Full Call Log</h2>
-  <button onclick="loadCallLog()">Show Call Log</button>
-  <ul id="callLogList"></ul>
-</section>
-    </div>
+    </section>
+
+    <!-- Filter Calls -->
+    <section>
+      <h2>🔍 Filter Calls</h2>
+      <input type="text" id="dayFilter" placeholder="Day (e.g. 01)">
+      <input type="text" id="monthFilter" placeholder="Month (e.g. 03)">
+      <input type="text" id="yearFilter" placeholder="Year (e.g. 2025)">
+      <button onclick="filterCalls()">Filter</button>
+      <ul id="callList"></ul>
+    </section>
+
+    <!-- Export Calls -->
+    <section>
+      <h2>📤 Export Calls</h2>
+      <button onclick="exportCalls()">Download CSV</button>
+    </section>
+
+    <!-- Distribute Calls -->
+    <section>
+      <h2 id="distributionTitle">📦 Distribution Result</h2>
+      <button onclick="distributeCalls()">Distribute</button>
+      <pre id="distributionResult"></pre>
+    </section>
+
+    <!-- Do-Not-Call List -->
+    <section>
+      <h2>🚫 Do-Not-Call List</h2>
+      <input type="text" id="dncNumber" placeholder="Enter number">
+      <button onclick="addToDNC()">Add to DNC</button>
+    </section>
+
+    <!-- Call Log -->
+    <section>
+      <h2 id="callLogTitle">📋 View Call Log</h2>
+      <button onclick="loadCallLog()">Show Call Log</button>
+      <ul id="callLogList"></ul>
+    </section>
   </div>
+
   <script src="dashboard.js"></script>
 </body>
 </html>

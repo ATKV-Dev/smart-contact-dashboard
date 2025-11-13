@@ -1,13 +1,52 @@
 ﻿const spinner = document.getElementById('spinner');
 const lastUpdatedEl = document.getElementById('lastUpdated');
 
-// Update timestamp display
-function updateTimestamp() {
-  const now = new Date().toLocaleString();
-  lastUpdatedEl.textContent = `🔄 Last updated: ${now}`;
+const translations = {
+  en: {
+    lastUpdated: '🔄 Last updated:',
+    callSummary: '📊 Call Summary',
+    today: 'Today',
+    month: 'This Month',
+    year: 'This Year',
+    callLog: '📋 View Call Log',
+    pleaseEnterYear: 'Please enter a year',
+    dncAdded: 'Number added to DNC (mocked)',
+    enterNumber: 'Enter a number',
+    distributionResult: '📦 Distribution Result'
+  },
+  af: {
+    lastUpdated: '🔄 Laas opgedateer:',
+    callSummary: '📊 Oproepopsomming',
+    today: 'Vandag',
+    month: 'Hierdie maand',
+    year: 'Hierdie jaar',
+    callLog: '📋 Sien Oproeplys',
+    pleaseEnterYear: 'Voer asseblief \'n jaar in',
+    dncAdded: 'Nommer by DNC gevoeg (gesimuleer)',
+    enterNumber: 'Voer \'n nommer in',
+    distributionResult: '📦 Verspreidingsresultaat'
+  }
+};
+
+let currentLang = 'en';
+
+function setLanguage(lang) {
+  currentLang = lang;
+  updateLabels();
+  loadDashboard();
 }
 
-// Load dashboard summary (simulated counts)
+function updateLabels() {
+  document.getElementById('callSummaryTitle').textContent = translations[currentLang].callSummary;
+  document.getElementById('callLogTitle').textContent = translations[currentLang].callLog;
+  document.getElementById('distributionTitle').textContent = translations[currentLang].distributionResult;
+}
+
+function updateTimestamp() {
+  const now = new Date().toLocaleString();
+  lastUpdatedEl.textContent = `${translations[currentLang].lastUpdated} ${now}`;
+}
+
 async function loadDashboard() {
   spinner.classList.add('visible');
 
@@ -24,7 +63,6 @@ async function loadDashboard() {
   updateTimestamp();
 }
 
-// Load full call log from backend
 async function loadCallLog() {
   spinner.classList.add('visible');
 
@@ -48,14 +86,13 @@ async function loadCallLog() {
   spinner.classList.remove('visible');
 }
 
-// Filter calls by date
 async function filterCalls() {
   const day = document.getElementById('dayFilter').value;
   const month = document.getElementById('monthFilter').value;
   const year = document.getElementById('yearFilter').value;
 
   if (!year) {
-    alert('Please enter a year');
+    alert(translations[currentLang].pleaseEnterYear);
     return;
   }
 
@@ -77,7 +114,6 @@ async function filterCalls() {
   spinner.classList.remove('visible');
 }
 
-// Display filtered calls
 function displayCalls(calls) {
   const list = document.getElementById('callList');
   list.innerHTML = '';
@@ -88,12 +124,10 @@ function displayCalls(calls) {
   });
 }
 
-// Export calls as CSV
 function exportCalls() {
   window.location.href = '/api/calls/export';
 }
 
-// Distribute calls
 async function distributeCalls() {
   spinner.classList.add('visible');
 
@@ -109,19 +143,16 @@ async function distributeCalls() {
   spinner.classList.remove('visible');
 }
 
-// Add number to Do-Not-Call list
 function addToDNC() {
   const number = document.getElementById('dncNumber').value;
   if (!number) {
-    alert('Enter a number');
+    alert(translations[currentLang].enterNumber);
     return;
   }
 
-  // You’d POST this to a real DNC endpoint in production
-  alert(`Number ${number} added to DNC (mocked)`);
+  alert(`${number} ${translations[currentLang].dncAdded}`);
 }
 
-// Listen for real-time updates
 const eventSource = new EventSource('/events');
 eventSource.onmessage = (event) => {
   const data = JSON.parse(event.data);
@@ -129,5 +160,4 @@ eventSource.onmessage = (event) => {
   loadDashboard();
 };
 
-// Initial load
 loadDashboard();
