@@ -142,13 +142,13 @@ async function distributeCalls() {
     const res = await fetch('/api/calls/distribute');
     const data = await res.json();
 
-    const tbody = document.querySelector('#distributionTable tbody');
+        const tbody = document.querySelector('#distributionTable tbody');
     tbody.innerHTML = '';
 
     data.forEach(call => {
       const row = document.createElement('tr');
       row.innerHTML = `
-         <td>${call.number}</td>
+        <td>${call.number}</td>
         <td>${call.agent}</td>
         <td>${new Date(call.date).toLocaleString()}</td>
       `;

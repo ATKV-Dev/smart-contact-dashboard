@@ -41,6 +41,16 @@
       padding: 8px;
       text-align: left;
     }
+
+    #languageToggle {
+      margin-bottom: 1em;
+    }
+
+    #languageSelect {
+      padding: 6px;
+      font-size: 16px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -48,8 +58,11 @@
     <h1>📞 Smart Contact Dashboard</h1>
 
     <div id="languageToggle">
-      <button onclick="setLanguage('en')">🇬🇧 English</button>
-      <button onclick="setLanguage('af')">🇿🇦 Afrikaans</button>
+      <label for="languageSelect">🌍 Language:</label>
+      <select id="languageSelect" onchange="setLanguage(this.value)">
+        <option value="en">🇬🇧 English</option>
+        <option value="af">🇿🇦 Afrikaans</option>
+      </select>
     </div>
 
     <p id="lastUpdated">🔄 Last updated: never</p>
