@@ -1,17 +1,17 @@
-const spinner = document.getElementById('spinner');
+﻿const spinner = document.getElementById('spinner');
 const lastUpdatedEl = document.getElementById('lastUpdated');
 
 // Update timestamp display
 function updateTimestamp() {
   const now = new Date().toLocaleString();
-  lastUpdatedEl.textContent = `?? Last updated: ${now}`;
+  lastUpdatedEl.textContent = `🔄 Last updated: ${now}`;
 }
 
 // Load dashboard summary (simulated counts)
 async function loadDashboard() {
   spinner.classList.add('visible');
 
-  // Simulated call counts � replace with real API logic if needed
+  // Simulated call counts — replace with real API logic if needed
   const todayCount = Math.floor(Math.random() * 10);
   const monthCount = Math.floor(Math.random() * 100);
   const yearCount = Math.floor(Math.random() * 1000);
@@ -41,6 +41,8 @@ async function loadCallLog() {
     });
   } catch (err) {
     console.error('Failed to load call log:', err);
+    const list = document.getElementById('callLogList');
+    list.innerHTML = '<li>Error loading call log</li>';
   }
 
   spinner.classList.remove('visible');
