@@ -4,8 +4,9 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
+const callRoutes = require('./routes/calls');
 app.use(express.static('public'));
-
+app.use('/api/calls', callRoutes);
 let lastCallCount = 0;
 
 app.get('/events', (req, res) => {

@@ -3,7 +3,7 @@ const path = require('path');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 function exportCalls(callLog) {
-  const filePath = path.join(__dirname, '../data/call_export.csv');
+  const filePath = path.join(__dirname, '../public/call_export.csv');
   const csvWriter = createCsvWriter({
     path: filePath,
     header: [
@@ -13,8 +13,7 @@ function exportCalls(callLog) {
     ]
   });
 
-  csvWriter.writeRecords(callLog);
-  return filePath;
+  return csvWriter.writeRecords(callLog).then(() => filePath);
 }
 
 module.exports = { exportCalls };

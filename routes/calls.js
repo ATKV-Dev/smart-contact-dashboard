@@ -1,31 +1,21 @@
-const express = require('express');
-const moment = require('moment');
-const { distributeCalls } = require('../utils/distributor');
+﻿const express = require('express');
 const { exportCalls } = require('../utils/export');
-const dncList = require('../data/dnc.json');
 const router = express.Router();
 
-let callLog = []; // Replace with DB in production
+// Simulated call log
+const callLog = [
+  { number: '+27123456789', agent: 'Jackie', date: '2025-11-13' },
+  { number: '+27876543210', agent: 'Thabo', date: '2025-11-12' }
+];
 
-router.get('/filter', (req, res) => {
-  const { day, month, year } = req.query;
-  let filtered = callLog;
-
-  if (day) filtered = filtered.filter(c => moment(c.date).isSame(day, 'day'));
-  if (month) filtered = filtered.filter(c => moment(c.date).isSame(month, 'month'));
-  if (year) filtered = filtered.filter(c => moment(c.date).isSame(year, 'year'));
-
-  res.json(filtered);
-});
-
-router.get('/export', (req, res) => {
-  const filePath = exportCalls(callLog);
-  res.download(filePath);
-});
-
-router.get('/distribute', (req, res) => {
-  const assignments = distributeCalls(callLog, dncList);
-  res.json(assignments);
+router.get('/export', async (req, res) => {
+  try {
+    const filePath = await exportCalls(callLog);
+    res.download(filePath);
+  } catch (err) {
+    console.error('Export error:', err);
+    res.status(500).send('Failed to export calls');
+  }
 });
 
 module.exports = router;
