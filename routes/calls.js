@@ -1,82 +1,52 @@
 ﻿const express = require('express');
-const axios = require('axios');
 const router = express.Router();
 
-const FRESHCALLER_API_KEY = process.env.FRESHCALLER_API_KEY;
-
-// Fetch all calls from Freshcaller
-const fetchCalls = async () => {
-  const response = await axios.get('https://api.freshcaller.com/v2/calls', {
-    headers: {
-      Authorization: `Token token=${FRESHCALLER_API_KEY}`,
-      'Content-Type': 'application/json'
-    }
-  });
-  return response.data.calls;
-};
+// Dummy call data
+const dummyCalls = [
+  { phone_number: '+27123456789', created_time: '2025-11-13T08:30:00Z' },
+  { phone_number: '+27876543210', created_time: '2025-11-12T14:45:00Z' },
+  { phone_number: '+27712345678', created_time: '2025-11-01T09:15:00Z' },
+  { phone_number: '+27654321098', created_time: '2025-10-25T11:00:00Z' }
+];
 
 // Filter calls by day/month/year
-router.get('/filter', async (req, res) => {
+router.get('/filter', (req, res) => {
   const { day, month, year } = req.query;
 
-  try {
-    const allCalls = await fetchCalls();
-    const filtered = allCalls.filter(call => {
-      const callDate = new Date(call.created_time);
-      const matchesDay = day ? callDate.getDate() === parseInt(day) : true;
-      const matchesMonth = month ? callDate.getMonth() + 1 === parseInt(month) : true;
-      const matchesYear = year ? callDate.getFullYear() === parseInt(year) : true;
-      return matchesDay && matchesMonth && matchesYear;
-    });
+  const filtered = dummyCalls.filter(call => {
+    const callDate = new Date(call.created_time);
+    const matchesDay = day ? callDate.getDate() === parseInt(day) : true;
+    const matchesMonth = month ? callDate.getMonth() + 1 === parseInt(month) : true;
+    const matchesYear = year ? callDate.getFullYear() === parseInt(year) : true;
+    return matchesDay && matchesMonth && matchesYear;
+  });
 
-    res.json(filtered);
-  } catch (err) {
-    console.error('Error filtering calls:', err.message);
-    res.status(500).json({ error: 'Failed to filter calls' });
-  }
+  res.json(filtered);
 });
 
 // Distribute calls to agents
-router.get('/distribute', async (req, res) => {
-  try {
-    const calls = await fetchCalls();
-    const agents = ['Jackie', 'Thabo', 'Lerato'];
-    const distributed = calls.map((call, index) => ({
-      number: call.phone_number,
-      agent: agents[index % agents.length],
-      date: call.created_time
-    }));
+router.get('/distribute', (req, res) => {
+  const agents = ['Jackie', 'Thabo', 'Lerato'];
+  const distributed = dummyCalls.map((call, index) => ({
+    number: call.phone_number,
+    agent: agents[index % agents.length],
+    date: call.created_time
+  }));
 
-    res.json(distributed);
-  } catch (err) {
-    console.error('Error distributing calls:', err.message);
-    res.status(500).json({ error: 'Failed to distribute calls' });
-  }
+  res.json(distributed);
 });
 
 // Export calls as CSV
-router.get('/export', async (req, res) => {
-  try {
-    const calls = await fetchCalls();
-    const csv = calls.map(call => `${call.phone_number},${call.created_time}`).join('\n');
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', 'attachment; filename="calls.csv"');
-    res.send(csv);
-  } catch (err) {
-    console.error('Error exporting calls:', err.message);
-    res.status(500).json({ error: 'Failed to export calls' });
-  }
+router.get('/export', (req, res) => {
+  const csv = dummyCalls.map(call => `${call.phone_number},${call.created_time}`).join('\n');
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', 'attachment; filename="calls.csv"');
+  res.send(csv);
 });
 
 // Fetch all calls (for call log)
-router.get('/', async (req, res) => {
-  try {
-    const calls = await fetchCalls();
-    res.json({ calls });
-  } catch (err) {
-    console.error('Error fetching call log:', err.message);
-    res.status(500).json({ error: 'Failed to fetch call log' });
-  }
+router.get('/', (req, res) => {
+  res.json({ calls: dummyCalls });
 });
 
 module.exports = router;

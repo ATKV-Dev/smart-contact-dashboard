@@ -80,7 +80,7 @@ async function loadCallLog() {
     const list = document.getElementById('callLogList');
     list.innerHTML = '';
 
-    data.calls.slice(0, 50).forEach(call => {
+    data.calls.forEach(call => {
       const li = document.createElement('li');
       li.textContent = `${call.phone_number} - ${call.created_time}`;
       list.appendChild(li);
@@ -140,12 +140,6 @@ async function distributeCalls() {
 
   try {
     const res = await fetch('/api/calls/distribute');
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || 'Unknown error');
-    }
-
     const data = await res.json();
     const resultDiv = document.getElementById('distributionResult');
     resultDiv.textContent = JSON.stringify(data, null, 2);
@@ -166,12 +160,5 @@ function addToDNC() {
 
   alert(`${number} ${translations[currentLang].dncAdded}`);
 }
-
-const eventSource = new EventSource('/events');
-eventSource.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  console.log('Update received:', data.message);
-  loadDashboard();
-};
 
 loadDashboard();
