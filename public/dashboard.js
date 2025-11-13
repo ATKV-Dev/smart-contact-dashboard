@@ -142,8 +142,8 @@ async function distributeCalls() {
     const res = await fetch('/api/calls/distribute');
 
     if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText);
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Unknown error');
     }
 
     const data = await res.json();
