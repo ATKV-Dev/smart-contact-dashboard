@@ -4,6 +4,44 @@
   <meta charset="UTF-8">
   <title>Smart Contact Dashboard</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.6);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 600px;
+    }
+
+    .close {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -41,7 +79,6 @@
     <section>
       <h2 id="distributionTitle">📦 Distribution Result</h2>
       <button onclick="distributeCalls()">Distribute</button>
-      <pre id="distributionResult"></pre>
     </section>
 
     <section>
@@ -55,6 +92,24 @@
       <button onclick="loadCallLog()">Show Call Log</button>
       <ul id="callLogList"></ul>
     </section>
+  </div>
+
+  <!-- Modal for Distributed Calls -->
+  <div id="distributionModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>📦 Distributed Calls</h2>
+      <table id="distributionTable">
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Agent</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <script src="dashboard.js"></script>

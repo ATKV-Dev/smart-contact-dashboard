@@ -141,14 +141,35 @@ async function distributeCalls() {
   try {
     const res = await fetch('/api/calls/distribute');
     const data = await res.json();
-    const resultDiv = document.getElementById('distributionResult');
-    resultDiv.textContent = JSON.stringify(data, null, 2);
+
+    const tbody = document.querySelector('#distributionTable tbody');
+    tbody.innerHTML = '';
+
+    data.forEach(call => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+         <td>${call.number}</td>
+        <td>${call.agent}</td>
+        <td>${new Date(call.date).toLocaleString()}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    openModal();
   } catch (err) {
     console.error('Failed to distribute calls:', err.message);
-    document.getElementById('distributionResult').textContent = `❌ ${err.message}`;
+    alert('❌ Failed to distribute calls');
   }
 
   spinner.classList.remove('visible');
+}
+
+function openModal() {
+  document.getElementById('distributionModal').style.display = 'block';
+}
+
+function closeModal() {
+  document.getElementById('distributionModal').style.display = 'none';
 }
 
 function addToDNC() {
