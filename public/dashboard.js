@@ -71,70 +71,6 @@ async function loadDashboard() {
   updateTimestamp();
 }
 
-async function loadCallLog() {
-  spinner.classList.add('visible');
-
-  try {
-    const res = await fetch('/api/calls');
-    const data = await res.json();
-    const list = document.getElementById('callLogList');
-    list.innerHTML = '';
-
-    data.calls.forEach(call => {
-      const li = document.createElement('li');
-      li.textContent = `${call.phone_number} - ${call.created_time}`;
-      list.appendChild(li);
-    });
-  } catch (err) {
-    console.error('Failed to load call log:', err.message);
-    document.getElementById('callLogList').innerHTML = '<li>Error loading call log</li>';
-  }
-
-  spinner.classList.remove('visible');
-}
-
-async function filterCalls() {
-  const day = document.getElementById('dayFilter').value;
-  const month = document.getElementById('monthFilter').value;
-  const year = document.getElementById('yearFilter').value;
-
-  if (!year) {
-    alert(translations[currentLang].pleaseEnterYear);
-    return;
-  }
-
-  const params = new URLSearchParams();
-  if (day) params.append('day', day);
-  if (month) params.append('month', month);
-  params.append('year', year);
-
-  spinner.classList.add('visible');
-
-  try {
-    const res = await fetch(`/api/calls/filter?${params.toString()}`);
-    const data = await res.json();
-    displayCalls(data);
-  } catch (err) {
-    console.error('Failed to filter calls:', err.message);
-  }
-
-  spinner.classList.remove('visible');
-}
-
-function displayCalls(calls) {
-  const list = document.getElementById('callList');
-  list.innerHTML = '';
-  calls.forEach(call => {
-    const item = document.createElement('li');
-    item.textContent = `${call.phone_number} - ${call.created_time}`;
-    list.appendChild(item);
-  });
-}
-
-function exportCalls() {
-  window.location.href = '/api/calls/export';
-}
-
 function distributeCalls() {
   const popup = window.open('', '_blank', 'width=800,height=600');
 
@@ -192,11 +128,43 @@ function distributeCalls() {
     });
 }
 
-// ✅ Wire up the button after DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('distributeBtn').addEventListener('click', distributeCalls);
-});
+function filterCalls() {
+  const day = document.getElementById('dayFilter').value;
+  const month = document.getElementById('monthFilter').value;
+  const year = document.getElementById('yearFilter').value;
 
+  if (!year) {
+    alert(translations[currentLang].pleaseEnterYear);
+    return;
+  }
+
+  const params = new URLSearchParams();
+  if (day) params.append('day', day);
+  if (month) params.append('month', month);
+  params.append('year', year);
+
+  spinner.classList.add('visible');
+
+  fetch(`/api/calls/filter?${params.toString()}`)
+    .then(res => res.json())
+    .then(displayCalls)
+    .catch(err => console.error('Failed to filter calls:', err.message))
+    .finally(() => spinner.classList.remove('visible'));
+}
+
+function displayCalls(calls) {
+  const list = document.getElementById('callList');
+  list.innerHTML = '';
+  calls.forEach(call => {
+    const item = document.createElement('li');
+    item.textContent = `${call.phone_number} - ${call.created_time}`;
+    list.appendChild(item);
+  });
+}
+
+function exportCalls() {
+  window.location.href = '/api/calls/export';
+}
 
 function addToDNC() {
   const number = document.getElementById('dncNumber').value;
@@ -208,5 +176,38 @@ function addToDNC() {
   alert(`${number} ${translations[currentLang].dncAdded}`);
 }
 
-// Initial dashboard load
-loadDashboard();
+function loadCallLog() {
+  spinner.classList.add('visible');
+
+  fetch('/api/calls')
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById('callLogList');
+      list.innerHTML = '';
+      data.calls.forEach(call => {
+        const li = document.createElement('li');
+        li.textContent = `${call.phone_number} - ${call.created_time}`;
+        list.appendChild(li);
+      });
+    })
+    .catch(err => {
+      console.error('Failed to load call log:', err.message);
+      document.getElementById('callLogList').innerHTML = '<li>Error loading call log</li>';
+    })
+    .finally(() => {
+      spinner.classList.remove('visible');
+    });
+}
+
+// ✅ Wire up all buttons after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('languageSelect').addEventListener('change', e => setLanguage(e.target.value));
+  document.getElementById('distributeBtn').addEventListener('click', distributeCalls);
+  document.getElementById('filterBtn').addEventListener('click', filterCalls);
+  document.getElementById('exportBtn').addEventListener('click', exportCalls);
+  document.getElementById('dncBtn').addEventListener('click', addToDNC);
+  document.getElementById('callLogBtn').addEventListener('click', loadCallLog);
+
+  // Initial load
+  setLanguage('en');
+});
