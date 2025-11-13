@@ -4,7 +4,6 @@ const router = express.Router();
 
 const FRESHCALLER_API_KEY = process.env.FRESHCALLER_API_KEY;
 
-// Fetch all calls from Freshcaller
 const fetchCalls = async () => {
   const response = await axios.get('https://api.freshcaller.com/v2/calls', {
     headers: {
@@ -15,7 +14,6 @@ const fetchCalls = async () => {
   return response.data.calls;
 };
 
-// Filter calls by day/month/year
 router.get('/filter', async (req, res) => {
   const { day, month, year } = req.query;
 
@@ -36,7 +34,6 @@ router.get('/filter', async (req, res) => {
   }
 });
 
-// Distribute calls (mocked logic)
 router.get('/distribute', async (req, res) => {
   try {
     const calls = await fetchCalls();
@@ -54,7 +51,6 @@ router.get('/distribute', async (req, res) => {
   }
 });
 
-// Export calls as CSV (optional)
 router.get('/export', async (req, res) => {
   try {
     const calls = await fetchCalls();
@@ -65,6 +61,16 @@ router.get('/export', async (req, res) => {
   } catch (err) {
     console.error('Error exporting calls:', err.message);
     res.status(500).send('Failed to export calls');
+  }
+});
+
+router.get('/', async (req, res) => {
+  try {
+    const calls = await fetchCalls();
+    res.json({ calls });
+  } catch (err) {
+    console.error('Error fetching call log:', err.message);
+    res.status(500).send('Failed to fetch call log');
   }
 });
 

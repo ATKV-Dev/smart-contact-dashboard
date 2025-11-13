@@ -5,9 +5,6 @@ const translations = {
   en: {
     lastUpdated: '🔄 Last updated:',
     callSummary: '📊 Call Summary',
-    today: 'Today',
-    month: 'This Month',
-    year: 'This Year',
     callLog: '📋 View Call Log',
     pleaseEnterYear: 'Please enter a year',
     dncAdded: 'Number added to DNC (mocked)',
@@ -17,9 +14,6 @@ const translations = {
   af: {
     lastUpdated: '🔄 Laas opgedateer:',
     callSummary: '📊 Oproepopsomming',
-    today: 'Vandag',
-    month: 'Hierdie maand',
-    year: 'Hierdie jaar',
     callLog: '📋 Sien Oproeplys',
     pleaseEnterYear: 'Voer asseblief \'n jaar in',
     dncAdded: 'Nommer by DNC gevoeg (gesimuleer)',
@@ -50,14 +44,28 @@ function updateTimestamp() {
 async function loadDashboard() {
   spinner.classList.add('visible');
 
-  // Simulated call counts — replace with real API logic if needed
-  const todayCount = Math.floor(Math.random() * 10);
-  const monthCount = Math.floor(Math.random() * 100);
-  const yearCount = Math.floor(Math.random() * 1000);
+  const today = new Date();
+  const day = today.getDate();
+  const month = today.getMonth() + 1;
+  const year = today.getFullYear();
 
-  document.getElementById('todayCount').textContent = todayCount;
-  document.getElementById('monthCount').textContent = monthCount;
-  document.getElementById('yearCount').textContent = yearCount;
+  try {
+    const [dayRes, monthRes, yearRes] = await Promise.all([
+      fetch(`/api/calls/filter?day=${day}&month=${month}&year=${year}`),
+      fetch(`/api/calls/filter?month=${month}&year=${year}`),
+      fetch(`/api/calls/filter?year=${year}`)
+    ]);
+
+    const todayCalls = await dayRes.json();
+    const monthCalls = await monthRes.json();
+    const yearCalls = await yearRes.json();
+
+    document.getElementById('todayCount').textContent = todayCalls.length;
+    document.getElementById('monthCount').textContent = monthCalls.length;
+    document.getElementById('yearCount').textContent = yearCalls.length;
+  } catch (err) {
+    console.error('Error loading dashboard:', err.message);
+  }
 
   spinner.classList.remove('visible');
   updateTimestamp();
@@ -67,7 +75,7 @@ async function loadCallLog() {
   spinner.classList.add('visible');
 
   try {
-    const res = await fetch('/api/freshcaller/calls');
+    const res = await fetch('/api/calls');
     const data = await res.json();
     const list = document.getElementById('callLogList');
     list.innerHTML = '';
@@ -78,9 +86,8 @@ async function loadCallLog() {
       list.appendChild(li);
     });
   } catch (err) {
-    console.error('Failed to load call log:', err);
-    const list = document.getElementById('callLogList');
-    list.innerHTML = '<li>Error loading call log</li>';
+    console.error('Failed to load call log:', err.message);
+    document.getElementById('callLogList').innerHTML = '<li>Error loading call log</li>';
   }
 
   spinner.classList.remove('visible');
@@ -108,7 +115,7 @@ async function filterCalls() {
     const data = await res.json();
     displayCalls(data);
   } catch (err) {
-    console.error('Failed to filter calls:', err);
+    console.error('Failed to filter calls:', err.message);
   }
 
   spinner.classList.remove('visible');
@@ -119,7 +126,7 @@ function displayCalls(calls) {
   list.innerHTML = '';
   calls.forEach(call => {
     const item = document.createElement('li');
-    item.textContent = `${call.number} - ${call.date}`;
+    item.textContent = `${call.phone_number} - ${call.created_time}`;
     list.appendChild(item);
   });
 }
@@ -133,11 +140,18 @@ async function distributeCalls() {
 
   try {
     const res = await fetch('/api/calls/distribute');
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText);
+    }
+
     const data = await res.json();
     const resultDiv = document.getElementById('distributionResult');
     resultDiv.textContent = JSON.stringify(data, null, 2);
   } catch (err) {
-    console.error('Failed to distribute calls:', err);
+    console.error('Failed to distribute calls:', err.message);
+    document.getElementById('distributionResult').textContent = `❌ ${err.message}`;
   }
 
   spinner.classList.remove('visible');
