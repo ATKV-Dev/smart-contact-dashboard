@@ -135,8 +135,7 @@ function exportCalls() {
   window.location.href = '/api/calls/export';
 }
 
-async function distributeCalls() {
-  // Open popup immediately to avoid browser blocking
+function distributeCalls() {
   const popup = window.open('', '_blank', 'width=800,height=600');
 
   if (!popup) {
@@ -144,14 +143,12 @@ async function distributeCalls() {
     return;
   }
 
-  // Initial loading content
   popup.document.write(`
     <html>
       <head>
         <title>Distributed Calls</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 20px; }
-          h2 { margin-top: 0; }
+          body { font-family: Arial; padding: 20px; }
           table { width: 100%; border-collapse: collapse; margin-top: 10px; }
           th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
         </style>
@@ -164,36 +161,42 @@ async function distributeCalls() {
   `);
   popup.document.close();
 
-  try {
-    const res = await fetch('/api/calls/distribute');
-    const data = await res.json();
+  fetch('/api/calls/distribute')
+    .then(res => res.json())
+    .then(data => {
+      const rows = data.map(call => `
+        <tr>
+          <td>${call.number}</td>
+          <td>${call.agent}</td>
+          <td>${new Date(call.date).toLocaleString()}</td>
+        </tr>
+      `).join('');
 
-    const rows = data.map(call => `
-      <tr>
-        <td>${call.number}</td>
-        <td>${call.agent}</td>
-        <td>${new Date(call.date).toLocaleString()}</td>
-      </tr>
-    `).join('');
-
-    popup.document.body.innerHTML = `
-      <h2>📦 Distributed Calls</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Number</th>
-            <th>Agent</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    `;
-  } catch (err) {
-    popup.document.body.innerHTML = `<p>❌ Failed to load data</p>`;
-    console.error('Failed to distribute calls:', err.message);
-  }
+      popup.document.body.innerHTML = `
+        <h2>📦 Distributed Calls</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Number</th>
+              <th>Agent</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    })
+    .catch(err => {
+      popup.document.body.innerHTML = `<p>❌ Failed to load data</p>`;
+      console.error('Failed to distribute calls:', err.message);
+    });
 }
+
+// ✅ Wire up the button after DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('distributeBtn').addEventListener('click', distributeCalls);
+});
+
 
 function addToDNC() {
   const number = document.getElementById('dncNumber').value;
