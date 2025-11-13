@@ -142,20 +142,43 @@ async function distributeCalls() {
     const res = await fetch('/api/calls/distribute');
     const data = await res.json();
 
-        const tbody = document.querySelector('#distributionTable tbody');
-    tbody.innerHTML = '';
-
-    data.forEach(call => {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${call.number}</td>
-        <td>${call.agent}</td>
-        <td>${new Date(call.date).toLocaleString()}</td>
-      `;
-      tbody.appendChild(row);
-    });
-
-    openModal();
+    // Create new window
+    const popup = window.open('', '_blank', 'width=700,height=500');
+    popup.document.write(`
+      <html>
+        <head>
+          <title>Distributed Calls</title>
+          <style>
+            body { font-family: Arial; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+            h2 { margin-top: 0; }
+          </style>
+        </head>
+        <body>
+          <h2>📦 Distributed Calls</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Number</th>
+                <th>Agent</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(call => `
+                <tr>
+                  <td>${call.number}</td>
+                  <td>${call.agent}</td>
+                  <td>${new Date(call.date).toLocaleString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `);
+    popup.document.close();
   } catch (err) {
     console.error('Failed to distribute calls:', err.message);
     alert('❌ Failed to distribute calls');
@@ -163,6 +186,7 @@ async function distributeCalls() {
 
   spinner.classList.remove('visible');
 }
+
 
 function openModal() {
   document.getElementById('distributionModal').style.display = 'block';
