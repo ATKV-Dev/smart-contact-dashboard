@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Contact Distributor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Smart Contact Distributor</h1>
+
+    <section>
+      <h2>📞 Filter Calls</h2>
+      <input type="date" id="dayFilter">
+      <input type="month" id="monthFilter">
+      <input type="number" id="yearFilter" placeholder="Year">
+      <button onclick="filterCalls()">Filter</button>
+    </section>
+
+    <section>
+      <h2>📤 Export Calls</h2>
+      <button onclick="exportCalls()">Download CSV</button>
+    </section>
+
+    <section>
+      <h2>📊 Distribute Calls</h2>
+      <button onclick="distributeCalls()">Distribute</button>
+      <div id="distributionResult"></div>
+    </section>
+
+    <section>
+      <h2>🚫 Do-Not-Call List</h2>
+      <input type="text" id="dncNumber" placeholder="Enter number to exclude">
+      <button onclick="addToDNC()">Add to DNC</button>
+    </section>
+
+    <section>
+      <h2>📋 Call Log</h2>
+      <ul id="callList"></ul>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
