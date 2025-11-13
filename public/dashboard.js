@@ -136,22 +136,24 @@ function exportCalls() {
 }
 
 async function distributeCalls() {
-  const popup = window.open('', '_blank', 'width=700,height=500');
+  // Open popup immediately to avoid browser blocking
+  const popup = window.open('', '_blank', 'width=800,height=600');
 
   if (!popup) {
     alert('❌ Popup blocked. Please allow popups for this site.');
     return;
   }
 
+  // Initial loading content
   popup.document.write(`
     <html>
       <head>
         <title>Distributed Calls</title>
         <style>
-          body { font-family: Arial; padding: 20px; }
+          body { font-family: Arial, sans-serif; padding: 20px; }
+          h2 { margin-top: 0; }
           table { width: 100%; border-collapse: collapse; margin-top: 10px; }
           th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-          h2 { margin-top: 0; }
         </style>
       </head>
       <body>
