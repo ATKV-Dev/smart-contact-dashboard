@@ -108,15 +108,25 @@ function distributeCalls() {
     });
 }
 
+const blockedNumbers = new Set();
+
 function addToDNC() {
-  const number = document.getElementById('dncNumber').value;
+  const number = document.getElementById('dncNumber').value.trim();
+
   if (!number) {
     alert(translations[currentLang].enterNumber);
     return;
   }
 
+  if (blockedNumbers.has(number)) {
+    alert('⚠️ This number has already been added.');
+    return;
+  }
+
+  blockedNumbers.add(number);
   alert(`${number} ${translations[currentLang].dncAdded}`);
 }
+
 
 function loadCallLog() {
   spinner.classList.add('visible');
