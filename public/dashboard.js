@@ -73,28 +73,12 @@ async function loadDashboard() {
 
 function distributeCalls() {
   const popup = window.open('', '_blank', 'width=800,height=600');
-
   if (!popup) {
     alert('❌ Popup blocked. Please allow popups for this site.');
     return;
   }
 
-  popup.document.write(`
-    <html>
-      <head>
-        <title>Distributed Calls</title>
-        <style>
-          body { font-family: Arial; padding: 20px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        </style>
-      </head>
-      <body>
-        <h2>📦 Distributed Calls</h2>
-        <p>Loading data...</p>
-      </body>
-    </html>
-  `);
+  popup.document.write('<p>Loading...</p>');
   popup.document.close();
 
   fetch('/api/calls/distribute')
@@ -110,13 +94,9 @@ function distributeCalls() {
 
       popup.document.body.innerHTML = `
         <h2>📦 Distributed Calls</h2>
-        <table>
+        <table border="1" cellpadding="8">
           <thead>
-            <tr>
-              <th>Number</th>
-              <th>Agent</th>
-              <th>Date</th>
-            </tr>
+            <tr><th>Number</th><th>Agent</th><th>Date</th></tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
@@ -124,46 +104,8 @@ function distributeCalls() {
     })
     .catch(err => {
       popup.document.body.innerHTML = `<p>❌ Failed to load data</p>`;
-      console.error('Failed to distribute calls:', err.message);
+      console.error(err);
     });
-}
-
-function filterCalls() {
-  const day = document.getElementById('dayFilter').value;
-  const month = document.getElementById('monthFilter').value;
-  const year = document.getElementById('yearFilter').value;
-
-  if (!year) {
-    alert(translations[currentLang].pleaseEnterYear);
-    return;
-  }
-
-  const params = new URLSearchParams();
-  if (day) params.append('day', day);
-  if (month) params.append('month', month);
-  params.append('year', year);
-
-  spinner.classList.add('visible');
-
-  fetch(`/api/calls/filter?${params.toString()}`)
-    .then(res => res.json())
-    .then(displayCalls)
-    .catch(err => console.error('Failed to filter calls:', err.message))
-    .finally(() => spinner.classList.remove('visible'));
-}
-
-function displayCalls(calls) {
-  const list = document.getElementById('callList');
-  list.innerHTML = '';
-  calls.forEach(call => {
-    const item = document.createElement('li');
-    item.textContent = `${call.phone_number} - ${call.created_time}`;
-    list.appendChild(item);
-  });
-}
-
-function exportCalls() {
-  window.location.href = '/api/calls/export';
 }
 
 function addToDNC() {
