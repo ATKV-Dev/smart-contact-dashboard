@@ -4,6 +4,7 @@ const router = express.Router();
 
 const FRESHCALLER_API_KEY = process.env.FRESHCALLER_API_KEY;
 
+// Fetch all calls from Freshcaller
 const fetchCalls = async () => {
   const response = await axios.get('https://api.freshcaller.com/v2/calls', {
     headers: {
@@ -14,6 +15,7 @@ const fetchCalls = async () => {
   return response.data.calls;
 };
 
+// Filter calls by day/month/year
 router.get('/filter', async (req, res) => {
   const { day, month, year } = req.query;
 
@@ -30,10 +32,11 @@ router.get('/filter', async (req, res) => {
     res.json(filtered);
   } catch (err) {
     console.error('Error filtering calls:', err.message);
-    res.status(500).send('Failed to filter calls');
+    res.status(500).json({ error: 'Failed to filter calls' });
   }
 });
 
+// Distribute calls to agents
 router.get('/distribute', async (req, res) => {
   try {
     const calls = await fetchCalls();
@@ -47,10 +50,11 @@ router.get('/distribute', async (req, res) => {
     res.json(distributed);
   } catch (err) {
     console.error('Error distributing calls:', err.message);
-    res.status(500).send('Failed to distribute calls');
+    res.status(500).json({ error: 'Failed to distribute calls' });
   }
 });
 
+// Export calls as CSV
 router.get('/export', async (req, res) => {
   try {
     const calls = await fetchCalls();
@@ -60,17 +64,18 @@ router.get('/export', async (req, res) => {
     res.send(csv);
   } catch (err) {
     console.error('Error exporting calls:', err.message);
-    res.status(500).send('Failed to export calls');
+    res.status(500).json({ error: 'Failed to export calls' });
   }
 });
 
+// Fetch all calls (for call log)
 router.get('/', async (req, res) => {
   try {
     const calls = await fetchCalls();
     res.json({ calls });
   } catch (err) {
     console.error('Error fetching call log:', err.message);
-    res.status(500).send('Failed to fetch call log');
+    res.status(500).json({ error: 'Failed to fetch call log' });
   }
 });
 
