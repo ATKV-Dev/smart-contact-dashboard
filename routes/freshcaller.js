@@ -1,10 +1,10 @@
-const express = require('express');
+﻿const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
 router.get('/calls', async (req, res) => {
   try {
-    const response = await axios.get('https://api.freshcaller.com/v2/calls', {
+    const response = await axios.get('https://api.freshcaller.com/v1/calls', {
       headers: {
         Authorization: `Token token=${process.env.FRESHCALLER_API_KEY}`,
         'Content-Type': 'application/json'
