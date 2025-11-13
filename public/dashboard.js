@@ -136,64 +136,61 @@ function exportCalls() {
 }
 
 async function distributeCalls() {
-  spinner.classList.add('visible');
+  const popup = window.open('', '_blank', 'width=700,height=500');
+
+  if (!popup) {
+    alert('❌ Popup blocked. Please allow popups for this site.');
+    return;
+  }
+
+  popup.document.write(`
+    <html>
+      <head>
+        <title>Distributed Calls</title>
+        <style>
+          body { font-family: Arial; padding: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+          th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+          h2 { margin-top: 0; }
+        </style>
+      </head>
+      <body>
+        <h2>📦 Distributed Calls</h2>
+        <p>Loading data...</p>
+      </body>
+    </html>
+  `);
+  popup.document.close();
 
   try {
     const res = await fetch('/api/calls/distribute');
     const data = await res.json();
 
-    // Create new window
-    const popup = window.open('', '_blank', 'width=700,height=500');
-    popup.document.write(`
-      <html>
-        <head>
-          <title>Distributed Calls</title>
-          <style>
-            body { font-family: Arial; padding: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-            h2 { margin-top: 0; }
-          </style>
-        </head>
-        <body>
-          <h2>📦 Distributed Calls</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Number</th>
-                <th>Agent</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${data.map(call => `
-                <tr>
-                  <td>${call.number}</td>
-                  <td>${call.agent}</td>
-                  <td>${new Date(call.date).toLocaleString()}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </body>
-      </html>
-    `);
-    popup.document.close();
+    const rows = data.map(call => `
+      <tr>
+        <td>${call.number}</td>
+        <td>${call.agent}</td>
+        <td>${new Date(call.date).toLocaleString()}</td>
+      </tr>
+    `).join('');
+
+    popup.document.body.innerHTML = `
+      <h2>📦 Distributed Calls</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Agent</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
   } catch (err) {
+    popup.document.body.innerHTML = `<p>❌ Failed to load data</p>`;
     console.error('Failed to distribute calls:', err.message);
-    alert('❌ Failed to distribute calls');
   }
-
-  spinner.classList.remove('visible');
-}
-
-
-function openModal() {
-  document.getElementById('distributionModal').style.display = 'block';
-}
-
-function closeModal() {
-  document.getElementById('distributionModal').style.display = 'none';
 }
 
 function addToDNC() {
@@ -206,4 +203,5 @@ function addToDNC() {
   alert(`${number} ${translations[currentLang].dncAdded}`);
 }
 
+// Initial dashboard load
 loadDashboard();
