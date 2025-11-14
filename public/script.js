@@ -221,7 +221,7 @@ function addToDNC() {
     return;
   }
 
-  fetch('/api/calls/block', {
+  fetch('/api/block', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ number })
