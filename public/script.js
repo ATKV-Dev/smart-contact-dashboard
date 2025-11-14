@@ -1,9 +1,35 @@
-﻿function setTheme(theme) {
+﻿// 🌍 Language translations
+const translations = {
+  en: {
+    lastUpdated: '🔄 Last updated:',
+    callSummary: '📊 Call Summary',
+    callLog: '📋 View Call Log',
+    distributionResult: '📦 Distribution Result',
+    pleaseEnterYear: 'Please enter a year',
+    enterNumber: 'Enter a number',
+    dncAdded: 'Number added to DNC (mocked)'
+  },
+  af: {
+    lastUpdated: '🔄 Laas opgedateer:',
+    callSummary: '📊 Oproepopsomming',
+    callLog: '📋 Sien Oproeplys',
+    distributionResult: '📦 Verspreidingsresultaat',
+    pleaseEnterYear: 'Voer asseblief \'n jaar in',
+    enterNumber: 'Voer \'n nommer in',
+    dncAdded: 'Nommer by DNC gevoeg (gesimuleer)'
+  }
+};
+
+let currentLang = 'en';
+
+// 🌗 Theme toggle
+function setTheme(theme) {
   document.body.classList.remove('light-mode', 'dark-mode');
   document.body.classList.add(`${theme}-mode`);
   localStorage.setItem('theme', theme);
 }
 
+// 🌍 Language toggle
 function setLanguage(lang) {
   currentLang = lang;
   updateLabels();
@@ -11,16 +37,18 @@ function setLanguage(lang) {
 }
 
 function updateLabels() {
-  document.getElementById('callSummaryTitle').textContent = '📊 Call Summary';
-  document.getElementById('callLogTitle').textContent = '📋 View Call Log';
-  document.getElementById('distributionTitle').textContent = '📦 Distribution Result';
+  document.getElementById('callSummaryTitle').textContent = translations[currentLang].callSummary;
+  document.getElementById('callLogTitle').textContent = translations[currentLang].callLog;
+  document.getElementById('distributionTitle').textContent = translations[currentLang].distributionResult;
+  document.getElementById('lastUpdated').textContent = `${translations[currentLang].lastUpdated} ${new Date().toLocaleString()}`;
 }
 
+// 🔄 Timestamp
 function updateTimestamp() {
-  const now = new Date().toLocaleString();
-  document.getElementById('lastUpdated').textContent = `🔄 Last updated: ${now}`;
+  document.getElementById('lastUpdated').textContent = `${translations[currentLang].lastUpdated} ${new Date().toLocaleString()}`;
 }
 
+// 📊 Load dashboard summary
 async function loadDashboard() {
   document.getElementById('spinner').classList.add('visible');
 
@@ -51,13 +79,14 @@ async function loadDashboard() {
   updateTimestamp();
 }
 
+// 🔍 Filter calls
 function filterCalls() {
   const day = document.getElementById('dayFilter').value;
   const month = document.getElementById('monthFilter').value;
   const year = document.getElementById('yearFilter').value;
 
   if (!year) {
-    alert('Please enter a year');
+    alert(translations[currentLang].pleaseEnterYear);
     return;
   }
 
@@ -82,10 +111,12 @@ function displayCalls(calls) {
   });
 }
 
+// 📤 Export calls
 function exportCalls() {
   window.location.href = '/api/calls/export';
 }
 
+// 📦 Distribute calls
 function distributeCalls() {
   const popup = window.open('', '_blank', 'width=800,height=600');
   if (!popup) {
@@ -123,10 +154,11 @@ function distributeCalls() {
     });
 }
 
+// 🚫 Add to DNC
 function addToDNC() {
   const number = document.getElementById('dncNumber').value.trim();
   if (!number) {
-    alert('Please enter a number');
+    alert(translations[currentLang].enterNumber);
     return;
   }
 
@@ -136,13 +168,14 @@ function addToDNC() {
     body: JSON.stringify({ number })
   })
     .then(res => res.json())
-    .then(data => alert(data.message))
+    .then(data => alert(translations[currentLang].dncAdded))
     .catch(err => {
       console.error('Failed to add to DNC:', err.message);
       alert('❌ Failed to add number');
     });
 }
 
+// 📋 Load call log
 function loadCallLog() {
   fetch('/api/calls')
     .then(res => res.json())
@@ -161,6 +194,7 @@ function loadCallLog() {
     });
 }
 
+// 📈 Generate report
 function generateReport() {
   const type = document.getElementById('reportType').value;
 
@@ -180,6 +214,7 @@ function generateReport() {
     });
 }
 
+// 📥 Upload and distribute contacts
 function uploadAndDistribute() {
   const fileInput = document.getElementById('excelFile');
   const file = fileInput.files[0];
@@ -212,6 +247,7 @@ function uploadAndDistribute() {
     });
 }
 
+// 🚀 Initialize dashboard
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme') || 'light';
   setTheme(savedTheme);
@@ -227,5 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('reportBtn').addEventListener('click', generateReport);
   document.getElementById('uploadBtn').addEventListener('click', uploadAndDistribute);
 
-  setLanguage('en');
+  // Set initial language and load dashboard
+  setLanguage(currentLang);
 });
+	
