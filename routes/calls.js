@@ -2,22 +2,18 @@
 const multer = require('multer');
 const xlsx = require('xlsx');
 const router = express.Router();
-const blockedNumbers = new Set();
+
 const upload = multer({ storage: multer.memoryStorage() });
 
 const dummyCalls = [
   { phone_number: '+27123456789', created_time: '2025-11-13T08:30:00Z' },
   { phone_number: '+27876543210', created_time: '2025-11-12T14:45:00Z' },
   { phone_number: '+27712345678', created_time: '2025-11-01T09:15:00Z' },
-  { phone_number: '+27654321098', created_time: '2025-10-25T11:00:00Z' },
-  { phone_number: '+27123452525', created_time: '2025-11-13T08:30:00Z' },
-  { phone_number: '+27876542568', created_time: '2025-11-12T14:45:00Z' },
-  { phone_number: '+27712347895', created_time: '2025-11-01T09:15:00Z' },
-  { phone_number: '+27654322356', created_time: '2025-10-25T11:00:00Z' },
-  { phone_number: '+27654352547', created_time: '2025-10-25T11:00:00Z' }
+  { phone_number: '+27654321098', created_time: '2025-10-25T11:00:00Z' }
 ];
 
-const agents = ['Jackie', 'Thabo', 'Lerato','Bucks','Hendrik','Jabu', 'sipho','Themba','Dylan'];
+const blockedNumbers = new Set();
+const agents = ['Jackie', 'Thabo', 'Lerato'];
 
 router.get('/filter', (req, res) => {
   const { day, month, year } = req.query;
@@ -41,14 +37,12 @@ router.get('/distribute', (req, res) => {
 });
 
 router.get('/export', (req, res) => {
-  const csv = dummyCalls.map(call => `${call.phone_number},${call.created_time}`).join('\n');
+  const csv = ['Phone Number,Created Time']
+    .concat(dummyCalls.map(call => `${call.phone_number},${call.created_time}`))
+    .join('\n');
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="calls.csv"');
   res.send(csv);
-});
-
-router.get('/', (req, res) => {
-  res.json({ calls: dummyCalls });
 });
 
 router.get('/report', (req, res) => {
@@ -72,17 +66,14 @@ router.get('/report', (req, res) => {
 router.post('/block', express.json(), (req, res) => {
   try {
     const { number } = req.body;
-
     if (!number || typeof number !== 'string') {
       console.log('❌ Invalid number received:', number);
       return res.status(400).json({ message: '❌ Invalid number format' });
     }
-
     if (blockedNumbers.has(number)) {
       console.log('⚠️ Duplicate block attempt:', number);
       return res.status(200).json({ message: '⚠️ This number has already been added.' });
     }
-
     blockedNumbers.add(number);
     console.log(`📵 Blocked number: ${number}`);
     res.status(201).json({ message: '✅ Number added to DNC.' });
@@ -91,7 +82,6 @@ router.post('/block', express.json(), (req, res) => {
     res.status(500).json({ message: '❌ Server error while adding to DNC' });
   }
 });
-
 
 router.post('/upload-distribute', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
