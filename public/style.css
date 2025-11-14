@@ -1,8 +1,9 @@
+/* Base styles */
 body {
   font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
   margin: 0;
   padding: 20px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .container {
@@ -18,6 +19,10 @@ h1, h2 {
   color: #333;
 }
 
+section {
+  margin-bottom: 2em;
+}
+
 button {
   padding: 8px 12px;
   margin: 5px;
@@ -27,6 +32,7 @@ button {
   background-color: #0077cc;
   color: white;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -39,6 +45,12 @@ input[type="text"], select {
   font-size: 14px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+input:focus, select:focus, button:focus {
+  outline: none;
+  box-shadow: 0 0 3px #0077cc;
 }
 
 ul {
@@ -99,20 +111,32 @@ th, td {
   text-align: left;
 }
 
-#languageToggle {
+/* Language and theme selectors */
+#languageToggle, #themeToggle {
   margin-bottom: 1em;
 }
 
-#languageSelect {
+#languageSelect, #themeSelect {
   padding: 6px;
   font-size: 16px;
   border-radius: 4px;
 }
+
+/* Light mode */
 body.light-mode {
   background-color: #ffffff;
   color: #000000;
 }
 
+body.light-mode button,
+body.light-mode input,
+body.light-mode select {
+  background-color: #f9f9f9;
+  color: #000;
+  border: 1px solid #ccc;
+}
+
+/* Dark mode */
 body.dark-mode {
   background-color: #121212;
   color: #f0f0f0;
@@ -126,12 +150,23 @@ body.dark-mode select {
   border: 1px solid #444;
 }
 
-body.light-mode button,
-body.light-mode input,
-body.light-mode select {
-  background-color: #f9f9f9;
-  color: #000;
-  border: 1px solid #ccc;
+body.dark-mode button:hover {
+  background-color: #2a2a2a;
 }
 
+body.dark-mode li {
+  border-bottom: 1px solid #333;
+}
 
+body.dark-mode .modal-content {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+}
+
+body.dark-mode table {
+  border-color: #444;
+}
+
+body.dark-mode th, body.dark-mode td {
+  border-color: #444;
+}
