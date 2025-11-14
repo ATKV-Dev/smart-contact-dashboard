@@ -216,27 +216,23 @@ function distributeCalls() {
 
 function addToDNC() {
   const number = document.getElementById('dncNumber').value.trim();
-
-  if (!number) {
-    alert('⚠️ Please enter a number');
+    if (!number) {
+    alert(translations[currentLang].enterNumber);
     return;
   }
 
-  fetch('/api/block', {
+  fetch('/api/calls/block', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ number })
   })
-    .then(res => res.json().then(data => ({ status: res.status, message: data.message })))
-    .then(({ status, message }) => {
-      alert(message || '✅ Number added to DNC');
-    })
+    .then(res => res.json())
+    .then(() => alert(translations[currentLang].dncAdded))
     .catch(err => {
-      console.error('❌ Failed to add to DNC:', err.message);
-      alert('❌ Network or server error');
+      console.error('Failed to add to DNC:', err.message);
+      alert('❌ Failed to add number');
     });
 }
-
 
 // 📋 Load call log
 function loadCallLog() {
