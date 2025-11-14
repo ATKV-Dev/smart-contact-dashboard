@@ -100,6 +100,7 @@ function updateLabels() {
   const reportType = document.getElementById('reportType');
   reportType.options[0].text = t.reportDay;
   reportType.options[1].text = t.reportMonth;
+
   document.querySelector('section:nth-of-type(2) h2').textContent = t.sectionHeaders.filterCalls;
   document.querySelector('section:nth-of-type(3) h2').textContent = t.sectionHeaders.exportCalls;
   document.querySelector('section:nth-of-type(5) h2').textContent = t.sectionHeaders.dncList;
@@ -107,13 +108,169 @@ function updateLabels() {
   document.querySelector('section:nth-of-type(8) h2').textContent = t.sectionHeaders.uploadContacts;
 }
 
-// ✅ Show confirmation modal
-function showUploadModal() {
-  document.getElementById('uploadModal').style.display = 'block';
+function updateTimestamp() {
+  document.getElementById('lastUpdated').textContent = `${translations[currentLang].lastUpdated} ${new Date().toLocaleString()}`;
 }
 
-function closeUploadModal() {
-  document.getElementById('uploadModal').style.display = 'none';
+async function loadDashboard() {
+  document.getElementById('spinner').classList.add('visible');
+
+  const today = new Date();
+  const day = today.getDate();
+  const month = today.getMonth() + 1;
+  const year = today.getFullYear();
+
+  try {
+    const [dayRes, monthRes, yearRes] = await Promise.all([
+      fetch(`/api/calls/filter?day=${day}&month=${month}&year=${year}`),
+      fetch(`/api/calls/filter?month=${month}&year=${year}`),
+      fetch(`/api/calls/filter?year=${year}`)
+    ]);
+
+    const todayCalls = await dayRes.json();
+    const monthCalls = await monthRes.json();
+    const yearCalls = await yearRes.json();
+
+    document.getElementById('todayCount').textContent = todayCalls.length;
+    document.getElementById('monthCount').textContent = monthCalls.length;
+    document.getElementById('yearCount').textContent = yearCalls.length;
+  } catch (err) {
+    console.error('Error loading dashboard:', err.message);
+  }
+
+  document.getElementById('spinner').classList.remove('visible');
+  updateTimestamp();
+}
+
+function filterCalls() {
+  const day = document.getElementById('dayFilter').value;
+  const month = document.getElementById('monthFilter').value;
+  const year = document.getElementById('yearFilter').value;
+
+  if (!year) {
+    alert(translations[currentLang].pleaseEnterYear);
+    return;
+  }
+
+  const params = new URLSearchParams();
+  if (day) params.append('day', day);
+  if (month) params.append('month', month);
+  params.append('year', year);
+
+  fetch(`/api/calls/filter?${params.toString()}`)
+    .then(res => res.json())
+    .then(displayCalls)
+    .catch(err => console.error('Failed to filter calls:', err.message));
+}
+
+function displayCalls(calls) {
+  const list = document.getElementById('callList');
+  list.innerHTML = '';
+  calls.forEach(call => {
+    const item = document.createElement('li');
+    item.textContent = `${call.phone_number} - ${call.created_time}`;
+    list.appendChild(item);
+  });
+}
+
+function exportCalls() {
+  window.location.href = '/api/calls/export';
+}
+
+function distributeCalls() {
+  const popup = window.open('', '_blank', 'width=800,height=600');
+  if (!popup) {
+    alert('❌ Popup blocked. Please allow popups for this site.');
+    return;
+  }
+
+  popup.document.write('<p>Loading...</p>');
+  popup.document.close();
+
+  fetch('/api/calls/distribute')
+    .then(res => res.json())
+    .then(data => {
+      const rows = data.map(call => `
+        <tr>
+          <td>${call.number}</td>
+          <td>${call.agent}</td>
+          <td>${new Date(call.date).toLocaleString()}</td>
+        </tr>
+      `).join('');
+
+      popup.document.body.innerHTML = `
+        <h2>📦 Distributed Calls</h2>
+        <table border="1" cellpadding="8">
+          <thead>
+            <tr><th>Number</th><th>Agent</th><th>Date</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    })
+    .catch(err => {
+      popup.document.body.innerHTML = `<p>❌ Failed to load data</p>`;
+      console.error(err);
+    });
+}
+
+function addToDNC() {
+  const number = document.getElementById('dncNumber').value.trim();
+    if (!number) {
+    alert(translations[currentLang].enterNumber);
+    return;
+  }
+
+  fetch('/api/calls/block', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ number })
+  })
+    .then(res => res.json())
+    .then(() => alert(translations[currentLang].dncAdded))
+    .catch(err => {
+      console.error('Failed to add to DNC:', err.message);
+      alert('❌ Failed to add number');
+    });
+}
+
+// 📋 Load call log
+function loadCallLog() {
+  fetch('/api/calls')
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById('callLogList');
+      list.innerHTML = '';
+      data.calls.forEach(call => {
+        const li = document.createElement('li');
+        li.textContent = `${call.phone_number} - ${call.created_time}`;
+        list.appendChild(li);
+      });
+    })
+    .catch(err => {
+      console.error('Failed to load call log:', err.message);
+      document.getElementById('callLogList').innerHTML = '<li>Error loading call log</li>';
+    });
+}
+
+// 📈 Generate report
+function generateReport() {
+  const type = document.getElementById('reportType').value;
+
+  fetch(`/api/calls/report?type=${type}`)
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById('reportList');
+      list.innerHTML = '';
+      Object.entries(data).forEach(([key, count]) => {
+        const li = document.createElement('li');
+        li.textContent = `${key}: ${count} calls`;
+        list.appendChild(li);
+      });
+    })
+    .catch(err => {
+      console.error('Failed to generate report:', err.message);
+    });
 }
 
 // 📥 Upload and distribute contacts
@@ -142,7 +299,6 @@ function uploadAndDistribute() {
         li.textContent = `${entry.number} → ${entry.agent}`;
         list.appendChild(li);
       });
-      showUploadModal();
     })
     .catch(err => {
       console.error('Upload failed:', err.message);
@@ -166,13 +322,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('reportBtn').addEventListener('click', generateReport);
   document.getElementById('uploadBtn').addEventListener('click', uploadAndDistribute);
 
-  window.addEventListener('click', function(event) {
-    const modal = document.getElementById('uploadModal');
-    if (event.target === modal) {
-      modal.style.display = 'none';
-    }
-  });
-
   setLanguage(currentLang);
 });
-

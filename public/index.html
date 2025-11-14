@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart Contact Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
   <main>
@@ -40,9 +40,9 @@
 
       <section>
         <h2>🔍 Filter Calls</h2>
-        <input type="text" id="dayFilter" placeholder="Day (e.g. 01)" />
-        <input type="text" id="monthFilter" placeholder="Month (e.g. 03)" />
-        <input type="text" id="yearFilter" placeholder="Year (e.g. 2025)" />
+        <input type="text" id="dayFilter" placeholder="Day (e.g. 01)">
+        <input type="text" id="monthFilter" placeholder="Month (e.g. 03)">
+        <input type="text" id="yearFilter" placeholder="Year (e.g. 2025)">
         <button id="filterBtn">Filter</button>
         <ul id="callList"></ul>
       </section>
@@ -59,7 +59,7 @@
 
       <section>
         <h2>🚫 Do-Not-Call List</h2>
-        <input type="text" id="dncNumber" placeholder="Enter number" />
+        <input type="text" id="dncNumber" placeholder="Enter number">
         <button id="dncBtn">Add to DNC</button>
       </section>
 
@@ -81,7 +81,7 @@
 
       <section>
         <h2>📥 Upload & Distribute Contacts</h2>
-        <input type="file" id="excelFile" accept=".xlsx,.xls" />
+        <input type="file" id="excelFile" accept=".xlsx,.xls">
         <button id="uploadBtn">Upload & Distribute</button>
         <ul id="uploadResults"></ul>
       </section>
@@ -91,14 +91,6 @@
   <footer>
     <p>© 2025 Dylan Yorke. Built with heart in Johannesburg 🇿🇦</p>
   </footer>
-
-  <!-- Upload confirmation modal -->
-  <div id="uploadModal" class="modal">
-    <div class="modal-content">
-      <span class="close" onclick="closeUploadModal()">&times;</span>
-      <p>✅ Contact list successfully distributed!</p>
-    </div>
-  </div>
 
   <script src="script.js"></script>
 </body>
