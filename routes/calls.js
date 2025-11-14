@@ -2,7 +2,7 @@
 const multer = require('multer');
 const xlsx = require('xlsx');
 const router = express.Router();
-
+const blockedNumbers = new Set();
 const upload = multer({ storage: multer.memoryStorage() });
 
 const dummyCalls = [
@@ -16,8 +16,6 @@ const dummyCalls = [
   { phone_number: '+27654322356', created_time: '2025-10-25T11:00:00Z' },
   { phone_number: '+27654352547', created_time: '2025-10-25T11:00:00Z' }
 ];
-
-const blockedNumbers = new Set();
 
 const agents = ['Jackie', 'Thabo', 'Lerato','Bucks','Hendrik','Jabu', 'sipho','Themba','Dylan'];
 
@@ -71,7 +69,7 @@ router.get('/report', (req, res) => {
   res.json(counts);
 });
 
-router.post('/block', (req, res) => {
+router.post('/block', express.json(), (req, res) => {
   try {
     const { number } = req.body;
 
@@ -93,7 +91,6 @@ router.post('/block', (req, res) => {
     res.status(500).json({ message: '❌ Server error while adding to DNC' });
   }
 });
-
 
 
 router.post('/upload-distribute', upload.single('file'), (req, res) => {
