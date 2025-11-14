@@ -80,13 +80,17 @@ router.post('/calls/block', (req, res) => {
 
 router.post('/block', (req, res) => {
   const { number } = req.body;
-  if (!number) return res.status(400).json({ message: 'No number provided' });
+  if (!number || typeof number !== 'string') {
+    return res.status(400).json({ message: '❌ Invalid number format' });
+  }
   if (blockedNumbers.has(number)) {
     return res.status(200).json({ message: '⚠️ This number has already been added.' });
   }
   blockedNumbers.add(number);
+  console.log(`📵 Blocked number: ${number}`);
   res.status(201).json({ message: '✅ Number added to DNC.' });
 });
+
 
 router.post('/upload-distribute', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
