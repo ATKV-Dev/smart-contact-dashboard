@@ -1,5 +1,4 @@
-﻿// 🌍 Language translations
-const translations = {
+﻿const translations = {
   en: {
     lastUpdated: '🔄 Last updated:',
     callSummary: '📊 Call Summary',
@@ -21,7 +20,14 @@ const translations = {
     dayPlaceholder: 'Day (e.g. 01)',
     monthPlaceholder: 'Month (e.g. 03)',
     yearPlaceholder: 'Year (e.g. 2025)',
-    numberPlaceholder: 'Enter number'
+    numberPlaceholder: 'Enter number',
+    sectionHeaders: {
+      filterCalls: '🔍 Filter Calls',
+      exportCalls: '📤 Export Calls',
+      dncList: '🚫 Do-Not-Call List',
+      callReport: '📈 Call Report',
+      uploadContacts: '📥 Upload & Distribute Contacts'
+    }
   },
   af: {
     lastUpdated: '🔄 Laas opgedateer:',
@@ -44,27 +50,31 @@ const translations = {
     dayPlaceholder: 'Dag (bv. 01)',
     monthPlaceholder: 'Maand (bv. 03)',
     yearPlaceholder: 'Jaar (bv. 2025)',
-    numberPlaceholder: 'Voer nommer in'
+    numberPlaceholder: 'Voer nommer in',
+    sectionHeaders: {
+      filterCalls: '🔍 Filtreer Oproepe',
+      exportCalls: '📤 Voer Oproepe Uit',
+      dncList: '🚫 Moenie-Bel Lys',
+      callReport: '📈 Oproepverslag',
+      uploadContacts: '📥 Laai Kontakte op & Versprei'
+    }
   }
 };
 
 let currentLang = 'en';
 
-// 🌗 Theme toggle
 function setTheme(theme) {
   document.body.classList.remove('light-mode', 'dark-mode');
   document.body.classList.add(`${theme}-mode`);
   localStorage.setItem('theme', theme);
 }
 
-// 🌍 Language toggle
 function setLanguage(lang) {
   currentLang = lang;
   updateLabels();
   loadDashboard();
 }
 
-// 🏷️ Update all visible labels and placeholders
 function updateLabels() {
   const t = translations[currentLang];
 
@@ -90,14 +100,18 @@ function updateLabels() {
   const reportType = document.getElementById('reportType');
   reportType.options[0].text = t.reportDay;
   reportType.options[1].text = t.reportMonth;
+
+  document.querySelector('section:nth-of-type(2) h2').textContent = t.sectionHeaders.filterCalls;
+  document.querySelector('section:nth-of-type(3) h2').textContent = t.sectionHeaders.exportCalls;
+  document.querySelector('section:nth-of-type(5) h2').textContent = t.sectionHeaders.dncList;
+  document.querySelector('section:nth-of-type(7) h2').textContent = t.sectionHeaders.callReport;
+  document.querySelector('section:nth-of-type(8) h2').textContent = t.sectionHeaders.uploadContacts;
 }
 
-// 🔄 Timestamp
 function updateTimestamp() {
   document.getElementById('lastUpdated').textContent = `${translations[currentLang].lastUpdated} ${new Date().toLocaleString()}`;
 }
 
-// 📊 Load dashboard summary
 async function loadDashboard() {
   document.getElementById('spinner').classList.add('visible');
 
@@ -128,7 +142,6 @@ async function loadDashboard() {
   updateTimestamp();
 }
 
-// 🔍 Filter calls
 function filterCalls() {
   const day = document.getElementById('dayFilter').value;
   const month = document.getElementById('monthFilter').value;
@@ -160,12 +173,10 @@ function displayCalls(calls) {
   });
 }
 
-// 📤 Export calls
 function exportCalls() {
   window.location.href = '/api/calls/export';
 }
 
-// 📦 Distribute calls
 function distributeCalls() {
   const popup = window.open('', '_blank', 'width=800,height=600');
   if (!popup) {
@@ -203,10 +214,9 @@ function distributeCalls() {
     });
 }
 
-// 🚫 Add to DNC
 function addToDNC() {
   const number = document.getElementById('dncNumber').value.trim();
-  if (!number) {
+    if (!number) {
     alert(translations[currentLang].enterNumber);
     return;
   }
@@ -233,7 +243,7 @@ function loadCallLog() {
       list.innerHTML = '';
       data.calls.forEach(call => {
         const li = document.createElement('li');
-                li.textContent = `${call.phone_number} - ${call.created_time}`;
+        li.textContent = `${call.phone_number} - ${call.created_time}`;
         list.appendChild(li);
       });
     })
