@@ -19,9 +19,6 @@ const dummyCalls = [
 
 const blockedNumbers = new Set();
 
-
-
-
 const agents = ['Jackie', 'Thabo', 'Lerato','Bucks','Hendrik','Jabu', 'sipho','Themba','Dylan'];
 
 router.get('/filter', (req, res) => {
@@ -73,8 +70,6 @@ router.get('/report', (req, res) => {
   });
   res.json(counts);
 });
-
-const blockedNumbers = new Set();
 
 router.post('/block', (req, res) => {
   try {
