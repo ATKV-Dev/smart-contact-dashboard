@@ -5,7 +5,6 @@ require('dotenv').config();
 
 const app = express();
 const callRoutes = require('./routes/calls');
-app.use(express.json()); // Should be near the top
 app.use(express.static('public'));
 app.use('/api', callRoutes);
 
