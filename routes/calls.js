@@ -1,7 +1,10 @@
 ﻿const express = require('express');
+const multer = require('multer');
+const xlsx = require('xlsx');
 const router = express.Router();
 
-// Dummy call data
+const upload = multer({ storage: multer.memoryStorage() });
+
 const dummyCalls = [
   { phone_number: '+27123456789', created_time: '2025-11-13T08:30:00Z' },
   { phone_number: '+27876543210', created_time: '2025-11-12T14:45:00Z' },
@@ -9,10 +12,11 @@ const dummyCalls = [
   { phone_number: '+27654321098', created_time: '2025-10-25T11:00:00Z' }
 ];
 
-// Filter calls by day/month/year
+const blockedNumbers = new Set();
+const agents = ['Jackie', 'Thabo', 'Lerato'];
+
 router.get('/filter', (req, res) => {
   const { day, month, year } = req.query;
-
   const filtered = dummyCalls.filter(call => {
     const callDate = new Date(call.created_time);
     const matchesDay = day ? callDate.getDate() === parseInt(day) : true;
@@ -20,23 +24,18 @@ router.get('/filter', (req, res) => {
     const matchesYear = year ? callDate.getFullYear() === parseInt(year) : true;
     return matchesDay && matchesMonth && matchesYear;
   });
-
   res.json(filtered);
 });
 
-// Distribute calls to agents
 router.get('/distribute', (req, res) => {
-  const agents = ['Jackie', 'Thabo', 'Lerato'];
   const distributed = dummyCalls.map((call, index) => ({
     number: call.phone_number,
     agent: agents[index % agents.length],
     date: call.created_time
   }));
-
   res.json(distributed);
 });
 
-// Export calls as CSV
 router.get('/export', (req, res) => {
   const csv = dummyCalls.map(call => `${call.phone_number},${call.created_time}`).join('\n');
   res.setHeader('Content-Type', 'text/csv');
@@ -44,9 +43,53 @@ router.get('/export', (req, res) => {
   res.send(csv);
 });
 
-// Fetch all calls (for call log)
 router.get('/', (req, res) => {
   res.json({ calls: dummyCalls });
+});
+
+router.get('/report', (req, res) => {
+  const { type } = req.query;
+  const counts = {};
+  dummyCalls.forEach(call => {
+    const date = new Date(call.created_time);
+    let key;
+    if (type === 'day') {
+      key = date.toISOString().split('T')[0];
+    } else if (type === 'month') {
+      key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }
+    if (key) {
+      counts[key] = (counts[key] || 0) + 1;
+    }
+  });
+  res.json(counts);
+});
+
+router.post('/block', (req, res) => {
+  const { number } = req.body;
+  if (!number) return res.status(400).json({ message: 'No number provided' });
+  if (blockedNumbers.has(number)) {
+    return res.status(200).json({ message: '⚠️ This number has already been added.' });
+  }
+  blockedNumbers.add(number);
+  res.status(201).json({ message: '✅ Number added to DNC.' });
+});
+
+router.post('/upload-distribute', upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+  try {
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = xlsx.utils.sheet_to_json(sheet);
+    const distributed = data.map(row => ({
+      number: row.number || row.phone_number || row['Contact Number'],
+      agent: agents[Math.floor(Math.random() * agents.length)],
+    }));
+    res.json(distributed);
+  } catch (err) {
+    console.error('Excel parsing failed:', err.message);
+    res.status(500).json({ message: 'Failed to process file' });
+  }
 });
 
 module.exports = router;
