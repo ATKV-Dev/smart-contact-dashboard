@@ -18,6 +18,10 @@ const dummyCalls = [
 ];
 
 const blockedNumbers = new Set();
+
+
+
+
 const agents = ['Jackie', 'Thabo', 'Lerato','Bucks','Hendrik','Jabu', 'sipho','Themba','Dylan'];
 
 router.get('/filter', (req, res) => {
@@ -70,18 +74,31 @@ router.get('/report', (req, res) => {
   res.json(counts);
 });
 
+const blockedNumbers = new Set();
+
 router.post('/block', (req, res) => {
-  const { number } = req.body;
-  if (!number || typeof number !== 'string') {
-    return res.status(400).json({ message: '❌ Invalid number format' });
+  try {
+    const { number } = req.body;
+
+    if (!number || typeof number !== 'string') {
+      console.log('❌ Invalid number received:', number);
+      return res.status(400).json({ message: '❌ Invalid number format' });
+    }
+
+    if (blockedNumbers.has(number)) {
+      console.log('⚠️ Duplicate block attempt:', number);
+      return res.status(200).json({ message: '⚠️ This number has already been added.' });
+    }
+
+    blockedNumbers.add(number);
+    console.log(`📵 Blocked number: ${number}`);
+    res.status(201).json({ message: '✅ Number added to DNC.' });
+  } catch (err) {
+    console.error('❌ DNC block failed:', err.message);
+    res.status(500).json({ message: '❌ Server error while adding to DNC' });
   }
-  if (blockedNumbers.has(number)) {
-    return res.status(200).json({ message: '⚠️ This number has already been added.' });
-  }
-  blockedNumbers.add(number);
-  console.log(`📵 Blocked number: ${number}`);
-  res.status(201).json({ message: '✅ Number added to DNC.' });
 });
+
 
 
 router.post('/upload-distribute', upload.single('file'), (req, res) => {

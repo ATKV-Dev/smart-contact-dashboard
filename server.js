@@ -7,7 +7,7 @@ const app = express();
 const callRoutes = require('./routes/calls');
 
 app.use(express.static('public'));
-app.use('/api/calls', callRoutes);
+app.use('/api', callRoutes);
 
 let lastCallCount = 0;
 
