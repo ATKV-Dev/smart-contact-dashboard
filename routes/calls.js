@@ -65,19 +65,6 @@ router.get('/report', (req, res) => {
   res.json(counts);
 });
 
-// DNC simulation route
-router.post('/calls/block', (req, res) => {
-  const { number } = req.body;
-
-  if (!number || typeof number !== 'string') {
-    return res.status(400).json({ error: 'Invalid number format' });
-  }
-
-  // Simulate success
-  console.log(`📵 Simulated DNC block for: ${number}`);
-  res.json({ success: true, message: `Number ${number} added to DNC list` });
-});
-
 router.post('/block', (req, res) => {
   const { number } = req.body;
   if (!number || typeof number !== 'string') {
