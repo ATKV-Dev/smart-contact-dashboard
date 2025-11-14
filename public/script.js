@@ -7,7 +7,21 @@ const translations = {
     distributionResult: '📦 Distribution Result',
     pleaseEnterYear: 'Please enter a year',
     enterNumber: 'Enter a number',
-    dncAdded: 'Number added to DNC (mocked)'
+    dncAdded: 'Number added to DNC',
+    filter: 'Filter',
+    downloadCSV: 'Download CSV',
+    distribute: 'Distribute',
+    addToDNC: 'Add to DNC',
+    showCallLog: 'Show Call Log',
+    generateReport: 'Generate Report',
+    uploadDistribute: 'Upload & Distribute',
+    reportDay: 'Per Day',
+    reportMonth: 'Per Month',
+    uploadPlaceholder: 'Select Excel file',
+    dayPlaceholder: 'Day (e.g. 01)',
+    monthPlaceholder: 'Month (e.g. 03)',
+    yearPlaceholder: 'Year (e.g. 2025)',
+    numberPlaceholder: 'Enter number'
   },
   af: {
     lastUpdated: '🔄 Laas opgedateer:',
@@ -16,7 +30,21 @@ const translations = {
     distributionResult: '📦 Verspreidingsresultaat',
     pleaseEnterYear: 'Voer asseblief \'n jaar in',
     enterNumber: 'Voer \'n nommer in',
-    dncAdded: 'Nommer by DNC gevoeg (gesimuleer)'
+    dncAdded: 'Nommer by DNC gevoeg',
+    filter: 'Filtreer',
+    downloadCSV: 'Laai CSV af',
+    distribute: 'Versprei',
+    addToDNC: 'Voeg by DNC',
+    showCallLog: 'Wys Oproeplys',
+    generateReport: 'Genereer Verslag',
+    uploadDistribute: 'Laai op & Versprei',
+    reportDay: 'Per Dag',
+    reportMonth: 'Per Maand',
+    uploadPlaceholder: 'Kies Excel-lêer',
+    dayPlaceholder: 'Dag (bv. 01)',
+    monthPlaceholder: 'Maand (bv. 03)',
+    yearPlaceholder: 'Jaar (bv. 2025)',
+    numberPlaceholder: 'Voer nommer in'
   }
 };
 
@@ -36,11 +64,32 @@ function setLanguage(lang) {
   loadDashboard();
 }
 
+// 🏷️ Update all visible labels and placeholders
 function updateLabels() {
-  document.getElementById('callSummaryTitle').textContent = translations[currentLang].callSummary;
-  document.getElementById('callLogTitle').textContent = translations[currentLang].callLog;
-  document.getElementById('distributionTitle').textContent = translations[currentLang].distributionResult;
-  document.getElementById('lastUpdated').textContent = `${translations[currentLang].lastUpdated} ${new Date().toLocaleString()}`;
+  const t = translations[currentLang];
+
+  document.getElementById('callSummaryTitle').textContent = t.callSummary;
+  document.getElementById('callLogTitle').textContent = t.callLog;
+  document.getElementById('distributionTitle').textContent = t.distributionResult;
+  document.getElementById('lastUpdated').textContent = `${t.lastUpdated} ${new Date().toLocaleString()}`;
+
+  document.getElementById('filterBtn').textContent = t.filter;
+  document.getElementById('exportBtn').textContent = t.downloadCSV;
+  document.getElementById('distributeBtn').textContent = t.distribute;
+  document.getElementById('dncBtn').textContent = t.addToDNC;
+  document.getElementById('callLogBtn').textContent = t.showCallLog;
+  document.getElementById('reportBtn').textContent = t.generateReport;
+  document.getElementById('uploadBtn').textContent = t.uploadDistribute;
+
+  document.getElementById('dayFilter').placeholder = t.dayPlaceholder;
+  document.getElementById('monthFilter').placeholder = t.monthPlaceholder;
+  document.getElementById('yearFilter').placeholder = t.yearPlaceholder;
+  document.getElementById('dncNumber').placeholder = t.numberPlaceholder;
+  document.getElementById('excelFile').title = t.uploadPlaceholder;
+
+  const reportType = document.getElementById('reportType');
+  reportType.options[0].text = t.reportDay;
+  reportType.options[1].text = t.reportMonth;
 }
 
 // 🔄 Timestamp
@@ -168,7 +217,7 @@ function addToDNC() {
     body: JSON.stringify({ number })
   })
     .then(res => res.json())
-    .then(data => alert(translations[currentLang].dncAdded))
+    .then(() => alert(translations[currentLang].dncAdded))
     .catch(err => {
       console.error('Failed to add to DNC:', err.message);
       alert('❌ Failed to add number');
@@ -184,7 +233,7 @@ function loadCallLog() {
       list.innerHTML = '';
       data.calls.forEach(call => {
         const li = document.createElement('li');
-        li.textContent = `${call.phone_number} - ${call.created_time}`;
+                li.textContent = `${call.phone_number} - ${call.created_time}`;
         list.appendChild(li);
       });
     })
@@ -263,7 +312,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('reportBtn').addEventListener('click', generateReport);
   document.getElementById('uploadBtn').addEventListener('click', uploadAndDistribute);
 
-  // Set initial language and load dashboard
   setLanguage(currentLang);
 });
-	
