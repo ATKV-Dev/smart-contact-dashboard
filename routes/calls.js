@@ -13,7 +13,8 @@ const dummyCalls = [
   { phone_number: '+27123452525', created_time: '2025-11-13T08:30:00Z' },
   { phone_number: '+27876542568', created_time: '2025-11-12T14:45:00Z' },
   { phone_number: '+27712347895', created_time: '2025-11-01T09:15:00Z' },
-  { phone_number: '+27654322356', created_time: '2025-10-25T11:00:00Z' }
+  { phone_number: '+27654322356', created_time: '2025-10-25T11:00:00Z' },
+  { phone_number: '+27654352547', created_time: '2025-10-25T11:00:00Z' }
 ];
 
 const blockedNumbers = new Set();
