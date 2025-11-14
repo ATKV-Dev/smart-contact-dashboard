@@ -216,8 +216,9 @@ function distributeCalls() {
 
 function addToDNC() {
   const number = document.getElementById('dncNumber').value.trim();
-    if (!number) {
-    alert(translations[currentLang].enterNumber);
+
+  if (!number) {
+    alert('⚠️ Please enter a number');
     return;
   }
 
@@ -227,10 +228,12 @@ function addToDNC() {
     body: JSON.stringify({ number })
   })
     .then(res => res.json())
-    .then(() => alert(translations[currentLang].dncAdded))
+    .then(data => {
+      alert(data.message || '✅ Number added to DNC');
+    })
     .catch(err => {
-      console.error('Failed to add to DNC:', err.message);
-      alert('❌ Failed to add number');
+      console.error('❌ Failed to add to DNC:', err.message);
+      alert('❌ Network or server error');
     });
 }
 
