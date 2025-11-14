@@ -2,44 +2,74 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Smart Contact Distributor</title>
+  <title>Smart Contact Dashboard</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>Smart Contact Distributor</h1>
+    <h1>📞 Smart Contact Dashboard</h1>
+
+    <div id="languageToggle">
+      <label for="languageSelect">🌍 Language:</label>
+      <select id="languageSelect">
+        <option value="en">🇬🇧 English</option>
+        <option value="af">🇿🇦 Afrikaans</option>
+      </select>
+    </div>
+
+    <p id="lastUpdated">🔄 Last updated: never</p>
+    <div id="spinner">⏳ Loading dashboard...</div>
 
     <section>
-      <h2>📞 Filter Calls</h2>
-      <input type="date" id="dayFilter">
-      <input type="month" id="monthFilter">
-      <input type="number" id="yearFilter" placeholder="Year">
-      <button onclick="filterCalls()">Filter</button>
+      <h2 id="callSummaryTitle">📊 Call Summary</h2>
+      <p>Today: <span id="todayCount">0</span></p>
+      <p>This Month: <span id="monthCount">0</span></p>
+      <p>This Year: <span id="yearCount">0</span></p>
+    </section>
+
+    <section>
+      <h2>🔍 Filter Calls</h2>
+      <input type="text" id="dayFilter" placeholder="Day (e.g. 01)">
+      <input type="text" id="monthFilter" placeholder="Month (e.g. 03)">
+      <input type="text" id="yearFilter" placeholder="Year (e.g. 2025)">
+      <button id="filterBtn">Filter</button>
+      <ul id="callList"></ul>
     </section>
 
     <section>
       <h2>📤 Export Calls</h2>
-      <button onclick="exportCalls()">Download CSV</button>
+      <button id="exportBtn">Download CSV</button>
     </section>
 
     <section>
-      <h2>📊 Distribute Calls</h2>
-      <button onclick="distributeCalls()">Distribute</button>
-      <div id="distributionResult"></div>
+      <h2 id="distributionTitle">📦 Distribution Result</h2>
+      <button id="distributeBtn">Distribute</button>
     </section>
+	
+	<section>
+  <h2>📈 Call Report</h2>
+  <select id="reportType">
+    <option value="day">Per Day</option>
+    <option value="month">Per Month</option>
+  </select>
+  <button id="reportBtn">Generate Report</button>
+  <ul id="reportList"></ul>
+</section>
+
 
     <section>
       <h2>🚫 Do-Not-Call List</h2>
-      <input type="text" id="dncNumber" placeholder="Enter number to exclude">
-      <button onclick="addToDNC()">Add to DNC</button>
+      <input type="text" id="dncNumber" placeholder="Enter number">
+      <button id="dncBtn">Add to DNC</button>
     </section>
 
     <section>
-      <h2>📋 Call Log</h2>
-      <ul id="callList"></ul>
+      <h2 id="callLogTitle">📋 View Call Log</h2>
+      <button id="callLogBtn">Show Call Log</button>
+      <ul id="callLogList"></ul>
     </section>
   </div>
 
-  <script src="script.js"></script>
+  <script src="dashboard.js"></script>
 </body>
 </html>
