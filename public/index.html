@@ -45,17 +45,6 @@
       <h2 id="distributionTitle">📦 Distribution Result</h2>
       <button id="distributeBtn">Distribute</button>
     </section>
-	
-	<section>
-  <h2>📈 Call Report</h2>
-  <select id="reportType">
-    <option value="day">Per Day</option>
-    <option value="month">Per Month</option>
-  </select>
-  <button id="reportBtn">Generate Report</button>
-  <ul id="reportList"></ul>
-</section>
-
 
     <section>
       <h2>🚫 Do-Not-Call List</h2>
@@ -67,6 +56,23 @@
       <h2 id="callLogTitle">📋 View Call Log</h2>
       <button id="callLogBtn">Show Call Log</button>
       <ul id="callLogList"></ul>
+    </section>
+
+    <section>
+      <h2>📈 Call Report</h2>
+      <select id="reportType">
+        <option value="day">Per Day</option>
+        <option value="month">Per Month</option>
+      </select>
+      <button id="reportBtn">Generate Report</button>
+      <ul id="reportList"></ul>
+    </section>
+
+    <section>
+      <h2>📥 Upload & Distribute Contacts</h2>
+      <input type="file" id="excelFile" accept=".xlsx,.xls">
+      <button id="uploadBtn">Upload & Distribute</button>
+      <ul id="uploadResults"></ul>
     </section>
   </div>
 
