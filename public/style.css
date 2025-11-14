@@ -23,21 +23,24 @@ section {
   margin-bottom: 2em;
 }
 
+/* Base button style */
 button {
   padding: 8px 12px;
   margin: 5px;
   font-size: 14px;
   border: none;
   border-radius: 4px;
-  background-color: #0077cc;
+  background-color: #0077cc; /* Base blue */
   color: white;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
+/* Hover effect: deeper blue */
 button:hover {
   background-color: #005fa3;
 }
+
 
 input[type="text"], select {
   padding: 6px;
