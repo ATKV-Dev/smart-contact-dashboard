@@ -243,6 +243,20 @@ function uploadAndDistribute() {
       alert('❌ Failed to distribute contacts');
     });
 }
+function setTheme(theme) {
+  document.body.classList.remove('light-mode', 'dark-mode');
+  document.body.classList.add(`${theme}-mode`);
+  localStorage.setItem('theme', theme);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  setTheme(savedTheme);
+  document.getElementById('themeSelect').value = savedTheme;
+
+  document.getElementById('themeSelect').addEventListener('change', e => {
+    setTheme(e.target.value);
+  });
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('languageSelect').addEventListener('change', e => setLanguage(e.target.value));
