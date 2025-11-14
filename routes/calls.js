@@ -37,12 +37,14 @@ router.get('/distribute', (req, res) => {
 });
 
 router.get('/export', (req, res) => {
-  const csv = ['Phone Number,Created Time']
-    .concat(dummyCalls.map(call => `${call.phone_number},${call.created_time}`))
-    .join('\n');
+  const csv = dummyCalls.map(call => `${call.phone_number},${call.created_time}`).join('\n');
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', 'attachment; filename="calls.csv"');
   res.send(csv);
+});
+
+router.get('/', (req, res) => {
+  res.json({ calls: dummyCalls });
 });
 
 router.get('/report', (req, res) => {
@@ -63,24 +65,14 @@ router.get('/report', (req, res) => {
   res.json(counts);
 });
 
-router.post('/block', express.json(), (req, res) => {
-  try {
-    const { number } = req.body;
-    if (!number || typeof number !== 'string') {
-      console.log('❌ Invalid number received:', number);
-      return res.status(400).json({ message: '❌ Invalid number format' });
-    }
-    if (blockedNumbers.has(number)) {
-      console.log('⚠️ Duplicate block attempt:', number);
-      return res.status(200).json({ message: '⚠️ This number has already been added.' });
-    }
-    blockedNumbers.add(number);
-    console.log(`📵 Blocked number: ${number}`);
-    res.status(201).json({ message: '✅ Number added to DNC.' });
-  } catch (err) {
-    console.error('❌ DNC block failed:', err.message);
-    res.status(500).json({ message: '❌ Server error while adding to DNC' });
+router.post('/block', (req, res) => {
+  const { number } = req.body;
+  if (!number) return res.status(400).json({ message: 'No number provided' });
+  if (blockedNumbers.has(number)) {
+    return res.status(200).json({ message: '⚠️ This number has already been added.' });
   }
+  blockedNumbers.add(number);
+  res.status(201).json({ message: '✅ Number added to DNC.' });
 });
 
 router.post('/upload-distribute', upload.single('file'), (req, res) => {

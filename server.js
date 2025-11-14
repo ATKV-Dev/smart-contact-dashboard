@@ -5,8 +5,9 @@ require('dotenv').config();
 
 const app = express();
 const callRoutes = require('./routes/calls');
+
 app.use(express.static('public'));
-app.use('/api', callRoutes);
+app.use('/api/calls', callRoutes);
 
 let lastCallCount = 0;
 

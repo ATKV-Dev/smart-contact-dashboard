@@ -216,24 +216,21 @@ function distributeCalls() {
 
 function addToDNC() {
   const number = document.getElementById('dncNumber').value.trim();
-
-  if (!number) {
-    alert('⚠️ Please enter a number');
+    if (!number) {
+    alert(translations[currentLang].enterNumber);
     return;
   }
 
-  fetch('/api/block', {
+  fetch('/api/calls/block', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ number })
   })
     .then(res => res.json())
-    .then(data => {
-      alert(data.message || '✅ Number added to DNC');
-    })
+    .then(() => alert(translations[currentLang].dncAdded))
     .catch(err => {
-      console.error('❌ Failed to add to DNC:', err.message);
-      alert('❌ Network or server error');
+      console.error('Failed to add to DNC:', err.message);
+      alert('❌ Failed to add number');
     });
 }
 
