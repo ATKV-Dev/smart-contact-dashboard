@@ -1,4 +1,5 @@
-﻿const translations = {
+﻿// 🌍 Translations
+const translations = {
   en: {
     lastUpdated: '🔄 Last updated:',
     callSummary: '📊 Call Summary',
@@ -61,7 +62,7 @@
   }
 };
 
-let currentLang = 'en';
+let currentLang = localStorage.getItem('language') || 'en';
 
 function setTheme(theme) {
   document.body.classList.remove('light-mode', 'dark-mode');
@@ -71,6 +72,7 @@ function setTheme(theme) {
 
 function setLanguage(lang) {
   currentLang = lang;
+  localStorage.setItem('language', lang);
   updateLabels();
   loadDashboard();
 }
@@ -78,47 +80,65 @@ function setLanguage(lang) {
 function updateLabels() {
   const t = translations[currentLang];
 
-  document.getElementById('callSummaryTitle').textContent = t.callSummary;
-  document.getElementById('callLogTitle').textContent = t.callLog;
-  document.getElementById('distributionTitle').textContent = t.distributionResult;
-  document.getElementById('lastUpdated').textContent = `${t.lastUpdated} ${new Date().toLocaleString()}`;
+  const safeSet = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
 
-  document.getElementById('filterBtn').textContent = t.filter;
-  document.getElementById('exportBtn').textContent = t.downloadCSV;
-  document.getElementById('distributeBtn').textContent = t.distribute;
-  document.getElementById('dncBtn').textContent = t.addToDNC;
-  document.getElementById('callLogBtn').textContent = t.showCallLog;
-  document.getElementById('reportBtn').textContent = t.generateReport;
-  document.getElementById('uploadBtn').textContent = t.uploadDistribute;
+  safeSet('callSummaryTitle', t.callSummary);
+  safeSet('callLogTitle', t.callLog);
+  safeSet('distributionTitle', t.distributionResult);
+  safeSet('lastUpdated', `${t.lastUpdated} ${new Date().toLocaleString()}`);
 
-  document.getElementById('dayFilter').placeholder = t.dayPlaceholder;
-  document.getElementById('monthFilter').placeholder = t.monthPlaceholder;
-  document.getElementById('yearFilter').placeholder = t.yearPlaceholder;
-  document.getElementById('dncNumber').placeholder = t.numberPlaceholder;
-  document.getElementById('excelFile').title = t.uploadPlaceholder;
+  safeSet('filterBtn', t.filter);
+  safeSet('exportBtn', t.downloadCSV);
+  safeSet('distributeBtn', t.distribute);
+  safeSet('dncBtn', t.addToDNC);
+  safeSet('callLogBtn', t.showCallLog);
+  safeSet('reportBtn', t.generateReport);
+  safeSet('uploadBtn', t.uploadDistribute);
+
+  const placeholders = {
+    dayFilter: t.dayPlaceholder,
+    monthFilter: t.monthPlaceholder,
+    yearFilter: t.yearPlaceholder,
+    dncNumber: t.numberPlaceholder,
+    callFile: t.uploadPlaceholder
+  };
+
+  for (const [id, text] of Object.entries(placeholders)) {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = text;
+  }
 
   const reportType = document.getElementById('reportType');
-  reportType.options[0].text = t.reportDay;
-  reportType.options[1].text = t.reportMonth;
+  if (reportType && reportType.options.length >= 2) {
+    reportType.options[0].text = t.reportDay;
+    reportType.options[1].text = t.reportMonth;
+  }
 
-  document.querySelector('section:nth-of-type(2) h2').textContent = t.sectionHeaders.filterCalls;
-  document.querySelector('section:nth-of-type(3) h2').textContent = t.sectionHeaders.exportCalls;
-  document.querySelector('section:nth-of-type(5) h2').textContent = t.sectionHeaders.dncList;
-  document.querySelector('section:nth-of-type(7) h2').textContent = t.sectionHeaders.callReport;
-  document.querySelector('section:nth-of-type(8) h2').textContent = t.sectionHeaders.uploadContacts;
+  const sections = document.querySelectorAll('section h2');
+  if (sections.length >= 8) {
+    sections[1].textContent = t.sectionHeaders.filterCalls;
+    sections[2].textContent = t.sectionHeaders.exportCalls;
+    sections[4].textContent = t.sectionHeaders.dncList;
+    sections[6].textContent = t.sectionHeaders.callReport;
+    sections[7].textContent = t.sectionHeaders.uploadContacts;
+  }
 }
 
 function updateTimestamp() {
-  document.getElementById('lastUpdated').textContent = `${translations[currentLang].lastUpdated} ${new Date().toLocaleString()}`;
+  const t = translations[currentLang];
+  const el = document.getElementById('lastUpdated');
+  if (el) el.textContent = `${t.lastUpdated} ${new Date().toLocaleString()}`;
 }
 
 async function loadDashboard() {
-  document.getElementById('spinner').classList.add('visible');
+  const spinner = document.getElementById('spinner');
+  if (spinner) spinner.classList.add('visible');
 
   const today = new Date();
-  const day = today.getDate();
-  const month = today.getMonth() + 1;
-  const year = today.getFullYear();
+  const [day, month, year] = [today.getDate(), today.getMonth() + 1, today.getFullYear()];
 
   try {
     const [dayRes, monthRes, yearRes] = await Promise.all([
@@ -127,9 +147,9 @@ async function loadDashboard() {
       fetch(`/api/calls/filter?year=${year}`)
     ]);
 
-    const todayCalls = await dayRes.json();
-    const monthCalls = await monthRes.json();
-    const yearCalls = await yearRes.json();
+    const [todayCalls, monthCalls, yearCalls] = await Promise.all([
+      dayRes.json(), monthRes.json(), yearRes.json()
+    ]);
 
     document.getElementById('todayCount').textContent = todayCalls.length;
     document.getElementById('monthCount').textContent = monthCalls.length;
@@ -138,26 +158,26 @@ async function loadDashboard() {
     console.error('Error loading dashboard:', err.message);
   }
 
-  document.getElementById('spinner').classList.remove('visible');
+  if (spinner) spinner.classList.remove('visible');
   updateTimestamp();
 }
 
 function filterCalls() {
+  const t = translations[currentLang];
   const day = document.getElementById('dayFilter').value;
   const month = document.getElementById('monthFilter').value;
   const year = document.getElementById('yearFilter').value;
 
   if (!year) {
-    alert(translations[currentLang].pleaseEnterYear);
+    alert(t.pleaseEnterYear);
     return;
   }
 
-  const params = new URLSearchParams();
+  const params = new URLSearchParams({ year });
   if (day) params.append('day', day);
   if (month) params.append('month', month);
-  params.append('year', year);
 
-  fetch(`/api/calls/filter?${params.toString()}`)
+  fetch(`/api/calls/filter?${params}`)
     .then(res => res.json())
     .then(displayCalls)
     .catch(err => console.error('Failed to filter calls:', err.message));
@@ -165,11 +185,12 @@ function filterCalls() {
 
 function displayCalls(calls) {
   const list = document.getElementById('callList');
+  if (!list) return;
   list.innerHTML = '';
   calls.forEach(call => {
-    const item = document.createElement('li');
-    item.textContent = `${call.phone_number} - ${call.created_time}`;
-    list.appendChild(item);
+    const li = document.createElement('li');
+    li.textContent = `${call.phone_number} - ${call.created_time}`;
+    list.appendChild(li);
   });
 }
 
@@ -201,9 +222,7 @@ function distributeCalls() {
       popup.document.body.innerHTML = `
         <h2>📦 Distributed Calls</h2>
         <table border="1" cellpadding="8">
-          <thead>
-            <tr><th>Number</th><th>Agent</th><th>Date</th></tr>
-          </thead>
+          <thead><tr><th>Number</th><th>Agent</th><th>Date</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       `;
@@ -211,13 +230,20 @@ function distributeCalls() {
     .catch(err => {
       popup.document.body.innerHTML = `<p>❌ Failed to load data</p>`;
       console.error(err);
+    })
+    .catch(err => {
+      popup.document.body.innerHTML = `<p>❌ Failed to load data</p>`;
+      console.error(err);
     });
 }
 
+// 🚫 Add number to Do-Not-Call list
 function addToDNC() {
   const number = document.getElementById('dncNumber').value.trim();
-    if (!number) {
-    alert(translations[currentLang].enterNumber);
+  const t = translations[currentLang];
+
+  if (!number) {
+    alert(t.enterNumber);
     return;
   }
 
@@ -227,7 +253,7 @@ function addToDNC() {
     body: JSON.stringify({ number })
   })
     .then(res => res.json())
-    .then(() => alert(translations[currentLang].dncAdded))
+    .then(() => alert(t.dncAdded))
     .catch(err => {
       console.error('Failed to add to DNC:', err.message);
       alert('❌ Failed to add number');
@@ -240,6 +266,7 @@ function loadCallLog() {
     .then(res => res.json())
     .then(data => {
       const list = document.getElementById('callLogList');
+      if (!list) return;
       list.innerHTML = '';
       data.calls.forEach(call => {
         const li = document.createElement('li');
@@ -249,7 +276,8 @@ function loadCallLog() {
     })
     .catch(err => {
       console.error('Failed to load call log:', err.message);
-      document.getElementById('callLogList').innerHTML = '<li>Error loading call log</li>';
+      const list = document.getElementById('callLogList');
+      if (list) list.innerHTML = '<li>Error loading call log</li>';
     });
 }
 
@@ -261,6 +289,7 @@ function generateReport() {
     .then(res => res.json())
     .then(data => {
       const list = document.getElementById('reportList');
+      if (!list) return;
       list.innerHTML = '';
       Object.entries(data).forEach(([key, count]) => {
         const li = document.createElement('li');
@@ -274,63 +303,60 @@ function generateReport() {
 }
 
 // 📥 Upload and distribute contacts
-
-document.addEventListener('DOMContentLoaded', function () {
-  const form = document.getElementById('uploadForm');
-  const fileInput = document.getElementById('callFile');
-  const resultContainer = document.getElementById('distributedResults');
-
-  if (!form || !fileInput || !resultContainer) {
-    console.error('❌ One or more upload elements not found in DOM');
-    return;
-  }
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const file = fileInput.files[0];
-    if (!file) {
-      alert('⚠️ Please select a file');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    fetch('/api/upload-distribute', {
-      method: 'POST',
-      body: formData
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log('✅ Response from backend:', data);
-
-        if (!Array.isArray(data)) {
-          alert(data.message || '❌ Unexpected response');
-          return;
-        }
-
-        resultContainer.innerHTML = '<h3>Distributed Calls</h3><ul>' +
-          data.map(d => `<li>${d.number} ➔ ${d.agent} (${d.campaign})</li>`).join('') +
-          '</ul>';
-      })
-      .catch(err => {
-        console.error('❌ Upload failed:', err.message);
-        alert('❌ Failed to upload and distribute');
-      });
-  });
-});
-
-
-// 🚀 Initialize dashboard
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme') || 'light';
-  const currentLang = localStorage.getItem('language') || 'en';
-
   setTheme(savedTheme);
-  setLanguage(currentLang);
+
+  const lang = localStorage.getItem('language') || 'en';
+  setLanguage(lang);
 
   const resultContainer = document.getElementById('distributedResults');
+  const form = document.getElementById('uploadForm');
+  const fileInput = document.getElementById('callFile');
+
+  if (form && fileInput && resultContainer) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const file = fileInput.files[0];
+      if (!file) {
+        alert(translations[currentLang].uploadPlaceholder);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      resultContainer.innerHTML = '<p>⏳ Uploading and distributing...</p>';
+
+      fetch('/api/upload-distribute', {
+        method: 'POST',
+        body: formData
+      })
+        .then(res => {
+          if (!res.ok) throw new Error(`❌ Server error: ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          if (!Array.isArray(data)) {
+            alert(data.message || '❌ Unexpected response');
+            resultContainer.innerHTML = '';
+            return;
+          }
+
+          resultContainer.innerHTML = '<h3>Distributed Calls</h3><ul>' +
+            data.map(d => `<li>${d.number || 'Unknown'} ➔ ${d.agent || 'Unassigned'} (${d.campaign || 'Unassigned'})</li>`).join('') +
+            '</ul>';
+        })
+        .catch(err => {
+          console.error('❌ Upload failed:', err.message);
+          alert('❌ Failed to upload and distribute');
+          resultContainer.innerHTML = '';
+        });
+    });
+  } else {
+    console.warn('⚠️ Upload form elements not found in DOM');
+  }
 
   // 🔒 Safe event binding
   function safeAdd(id, event, handler) {
@@ -347,55 +373,5 @@ document.addEventListener('DOMContentLoaded', () => {
   safeAdd('dncBtn', 'click', addToDNC);
   safeAdd('callLogBtn', 'click', loadCallLog);
   safeAdd('reportBtn', 'click', generateReport);
-
-  // 📥 Upload and distribute contacts
-  const form = document.getElementById('uploadForm');
-  const fileInput = document.getElementById('callFile');
-
-  if (!form || !fileInput || !resultContainer) {
-    console.error('❌ Upload form elements not found in DOM');
-    return;
-  }
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const file = fileInput.files[0];
-    if (!file) {
-      alert('⚠️ Please select a file');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    resultContainer.innerHTML = '<p>⏳ Uploading and distributing...</p>';
-
-    fetch('/api/upload-distribute', {
-      method: 'POST',
-      body: formData
-    })
-      .then(res => {
-        if (!res.ok) throw new Error(`❌ Server error: ${res.status}`);
-        return res.json();
-      })
-      .then(data => {
-        console.log('✅ Response from backend:', data);
-
-        if (!Array.isArray(data)) {
-          alert(data.message || '❌ Unexpected response');
-          return;
-        }
-
-        resultContainer.innerHTML = '<h3>Distributed Calls</h3><ul>' +
-          data.map(d => `<li>${d.number || 'Unknown'} ➔ ${d.agent || 'Unassigned'} (${d.campaign || 'Unassigned'})</li>`).join('') +
-          '</ul>';
-      })
-      .catch(err => {
-        console.error('❌ Upload failed:', err.message);
-        alert('❌ Failed to upload and distribute');
-        resultContainer.innerHTML = '';
-      });
-  });
 });
 
