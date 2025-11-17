@@ -274,37 +274,51 @@ function generateReport() {
 }
 
 // 📥 Upload and distribute contacts
-function uploadAndDistribute() {
-  const fileInput = document.getElementById('excelFile');
-  const file = fileInput.files[0];
 
-  if (!file) {
-    alert('Please select an Excel file');
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('uploadForm');
+  const fileInput = document.getElementById('callFile');
+  const resultContainer = document.getElementById('distributedResults');
+
+  if (!form || !fileInput || !resultContainer) {
+    console.error('❌ One or more upload elements not found in DOM');
     return;
   }
 
-  const formData = new FormData();
-  formData.append('file', file);
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
 
-  fetch('/api/calls/upload-distribute', {
-    method: 'POST',
-    body: formData
-  })
-    .then(res => res.json())
-    .then(data => {
-      const list = document.getElementById('uploadResults');
-      list.innerHTML = '';
-      data.forEach(entry => {
-        const li = document.createElement('li');
-        li.textContent = `${entry.number} → ${entry.agent}`;
-        list.appendChild(li);
-      });
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('⚠️ Please select a file');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/api/upload-distribute', {
+      method: 'POST',
+      body: formData
     })
-    .catch(err => {
-      console.error('Upload failed:', err.message);
-      alert('❌ Failed to distribute contacts');
-    });
-}
+      .then(res => res.json())
+      .then(data => {
+        if (!Array.isArray(data)) {
+          alert(data.message || '❌ Unexpected response');
+          return;
+        }
+
+        resultContainer.innerHTML = '<h3>Distributed Calls</h3><ul>' +
+          data.map(d => `<li>${d.number} → ${d.agent} (${d.campaign || 'Unassigned'})</li>`).join('') +
+          '</ul>';
+      })
+      .catch(err => {
+        console.error('❌ Upload failed:', err.message);
+        alert('❌ Failed to upload and distribute');
+      });
+  });
+});
+
 
 // 🚀 Initialize dashboard
 document.addEventListener('DOMContentLoaded', () => {
