@@ -275,34 +275,43 @@ function generateReport() {
 
 // 📥 Upload and distribute contacts
 
-router.post('/upload-distribute', upload.single('file'), (req, res) => {
-  if (!req.file) {
-    console.log('❌ No file uploaded');
-    return res.status(400).json({ message: 'No file uploaded' });
-  }
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('uploadForm');
+  const fileInput = document.getElementById('callFile');
+  const resultContainer = document.getElementById('distributedResults');
 
-  try {
-    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = xlsx.utils.sheet_to_json(sheet);
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
 
-    console.log('✅ Parsed rows:', data.length);
-    if (!Array.isArray(data) || data.length === 0) {
-      return res.status(400).json({ message: '❌ File is empty or invalid format' });
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('⚠️ Please select a file');
+      return;
     }
 
-    const distributed = data.map((row, index) => ({
-      number: row.number || row.phone_number || row['Contact Number'],
-      agent: agents[index % agents.length],
-      campaign: row.campaign || 'Unassigned'
-    }));
+    const formData = new FormData();
+    formData.append('file', file);
 
-    console.log('✅ Distributed:', distributed.length);
-    res.json(distributed);
-  } catch (err) {
-    console.error('❌ Excel parsing failed:', err.message);
-    res.status(500).json({ message: '❌ Failed to process file' });
-  }
+    fetch('/api/upload-distribute', {
+      method: 'POST',
+      body: formData
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!Array.isArray(data)) {
+          alert(data.message || '❌ Unexpected response');
+          return;
+        }
+
+        resultContainer.innerHTML = '<h3>Distributed Calls</h3><ul>' +
+          data.map(d => `<li>${d.number} → ${d.agent} (${d.campaign})</li>`).join('') +
+          '</ul>';
+      })
+      .catch(err => {
+        console.error('❌ Upload failed:', err.message);
+        alert('❌ Failed to upload and distribute');
+      });
+  });
 });
 
 

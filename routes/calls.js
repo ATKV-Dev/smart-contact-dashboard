@@ -94,12 +94,20 @@ router.post('/block', express.json(), (req, res) => {
 });
 
 router.post('/upload-distribute', upload.single('file'), (req, res) => {
-  if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+  if (!req.file) {
+    console.log('❌ No file uploaded');
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
 
   try {
     const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = xlsx.utils.sheet_to_json(sheet);
+
+    console.log('✅ Parsed rows:', data.length);
+    if (!Array.isArray(data) || data.length === 0) {
+      return res.status(400).json({ message: '❌ File is empty or invalid format' });
+    }
 
     const distributed = data.map((row, index) => ({
       number: row.number || row.phone_number || row['Contact Number'],
@@ -107,10 +115,11 @@ router.post('/upload-distribute', upload.single('file'), (req, res) => {
       campaign: row.campaign || 'Unassigned'
     }));
 
+    console.log('✅ Distributed:', distributed.length);
     res.json(distributed);
   } catch (err) {
-    console.error('Excel parsing failed:', err.message);
-    res.status(500).json({ message: 'Failed to process file' });
+    console.error('❌ Excel parsing failed:', err.message);
+    res.status(500).json({ message: '❌ Failed to process file' });
   }
 });
 
