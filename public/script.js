@@ -339,4 +339,3 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('uploadBtn').addEventListener('click', uploadAndDistribute);
 });
   setLanguage(currentLang);
-});
