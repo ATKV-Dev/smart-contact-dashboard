@@ -280,6 +280,11 @@ document.addEventListener('DOMContentLoaded', function () {
   const fileInput = document.getElementById('callFile');
   const resultContainer = document.getElementById('distributedResults');
 
+  if (!form || !fileInput || !resultContainer) {
+    console.error('❌ One or more upload elements not found in DOM');
+    return;
+  }
+
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -298,13 +303,15 @@ document.addEventListener('DOMContentLoaded', function () {
     })
       .then(res => res.json())
       .then(data => {
+        console.log('✅ Response from backend:', data);
+
         if (!Array.isArray(data)) {
           alert(data.message || '❌ Unexpected response');
           return;
         }
 
         resultContainer.innerHTML = '<h3>Distributed Calls</h3><ul>' +
-          data.map(d => `<li>${d.number} → ${d.agent} (${d.campaign})</li>`).join('') +
+          data.map(d => `<li>${d.number} ➔ ${d.agent} (${d.campaign})</li>`).join('') +
           '</ul>';
       })
       .catch(err => {

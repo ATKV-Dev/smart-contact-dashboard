@@ -79,16 +79,15 @@
         <ul id="reportList"></ul>
       </section>
 
-      <section>
-       <h2>Upload Call List</h2>
-    <form id="uploadForm">
-  <input type="file" id="callFile" accept=".xlsx,.csv" />
-       <button type="submit">Upload & Distribute</button>
-</form>
-<div id="distributedResults"></div>
+     <section>
+  <h2>Upload Call List</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="callFile" accept=".xlsx,.csv" />
+    <button type="submit">Upload & Distribute</button>
+  </form>
+  <div id="distributedResults"></div>
+</section>
 
-		
-      </section>
     </div>
   </main>
 
