@@ -325,19 +325,77 @@ document.addEventListener('DOMContentLoaded', function () {
 // 🚀 Initialize dashboard
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme') || 'light';
+  const currentLang = localStorage.getItem('language') || 'en';
+
   setTheme(savedTheme);
-  document.getElementById('themeSelect').value = savedTheme;
-
-  document.getElementById('themeSelect').addEventListener('change', e => setTheme(e.target.value));
-  document.getElementById('languageSelect').addEventListener('change', e => setLanguage(e.target.value));
-  document.getElementById('distributeBtn').addEventListener('click', distributeCalls);
-  document.getElementById('filterBtn').addEventListener('click', filterCalls);
-  document.getElementById('exportBtn').addEventListener('click', exportCalls);
-  document.getElementById('dncBtn').addEventListener('click', addToDNC);
-  document.getElementById('callLogBtn').addEventListener('click', loadCallLog);
-  document.getElementById('reportBtn').addEventListener('click', generateReport);
-  document.getElementById('uploadBtn').addEventListener('click', uploadAndDistribute);
-
-  // ✅ Set language after DOM is ready
   setLanguage(currentLang);
+
+  const resultContainer = document.getElementById('distributedResults');
+
+  // 🔒 Safe event binding
+  function safeAdd(id, event, handler) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener(event, handler);
+    else console.warn(`⚠️ Element not found: ${id}`);
+  }
+
+  safeAdd('themeSelect', 'change', e => setTheme(e.target.value));
+  safeAdd('languageSelect', 'change', e => setLanguage(e.target.value));
+  safeAdd('distributeBtn', 'click', distributeCalls);
+  safeAdd('filterBtn', 'click', filterCalls);
+  safeAdd('exportBtn', 'click', exportCalls);
+  safeAdd('dncBtn', 'click', addToDNC);
+  safeAdd('callLogBtn', 'click', loadCallLog);
+  safeAdd('reportBtn', 'click', generateReport);
+
+  // 📥 Upload and distribute contacts
+  const form = document.getElementById('uploadForm');
+  const fileInput = document.getElementById('callFile');
+
+  if (!form || !fileInput || !resultContainer) {
+    console.error('❌ Upload form elements not found in DOM');
+    return;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('⚠️ Please select a file');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    resultContainer.innerHTML = '<p>⏳ Uploading and distributing...</p>';
+
+    fetch('/api/upload-distribute', {
+      method: 'POST',
+      body: formData
+    })
+      .then(res => {
+        if (!res.ok) throw new Error(`❌ Server error: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        console.log('✅ Response from backend:', data);
+
+        if (!Array.isArray(data)) {
+          alert(data.message || '❌ Unexpected response');
+          return;
+        }
+
+        resultContainer.innerHTML = '<h3>Distributed Calls</h3><ul>' +
+          data.map(d => `<li>${d.number || 'Unknown'} ➔ ${d.agent || 'Unassigned'} (${d.campaign || 'Unassigned'})</li>`).join('') +
+          '</ul>';
+      })
+      .catch(err => {
+        console.error('❌ Upload failed:', err.message);
+        alert('❌ Failed to upload and distribute');
+        resultContainer.innerHTML = '';
+      });
+  });
 });
+
