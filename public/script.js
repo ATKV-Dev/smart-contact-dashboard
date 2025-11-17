@@ -337,8 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('callLogBtn').addEventListener('click', loadCallLog);
   document.getElementById('reportBtn').addEventListener('click', generateReport);
   document.getElementById('uploadBtn').addEventListener('click', uploadAndDistribute);
-});
-
 
   setLanguage(currentLang);
 });
